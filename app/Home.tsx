@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, CalendarDays, CheckCircle2, Clock3, CloudSun, Command, Folder, Github, Globe2, Mail, MapPin, Plus, Search, Settings2, Sparkles, TrendingUp, X } from "lucide-react";
+import { ArrowUpRight, CalendarDays, CheckCircle2, Clock3, CloudSun, Command, Folder, Github, Mail, MapPin, Plus, Search, Settings2, Sparkles, TrendingUp, X } from "lucide-react";
 import { defaultConfig, StartpageConfig } from "./startpage-config";
 
 const STORAGE_KEY = "startpage-config-v1";
@@ -29,16 +29,38 @@ function faviconUrl(url: string) {
 
 function Typewriter({ text }: { text: string }) {
   const [visible, setVisible] = useState("");
+
   useEffect(() => {
+    let cancelled = false;
+    let timer: number | undefined;
+
+    const wait = (delay: number) => new Promise<void>(resolve => {
+      timer = window.setTimeout(resolve, delay);
+    });
+
+    async function animate() {
+      while (!cancelled) {
+        for (let index = 1; index <= text.length && !cancelled; index += 1) {
+          setVisible(text.slice(0, index));
+          await wait(48);
+        }
+        await wait(1800);
+        for (let index = text.length - 1; index >= 0 && !cancelled; index -= 1) {
+          setVisible(text.slice(0, index));
+          await wait(28);
+        }
+        await wait(420);
+      }
+    }
+
     setVisible("");
-    let index = 0;
-    const timer = window.setInterval(() => {
-      index += 1;
-      setVisible(text.slice(0, index));
-      if (index >= text.length) window.clearInterval(timer);
-    }, 48);
-    return () => window.clearInterval(timer);
+    animate();
+    return () => {
+      cancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
   }, [text]);
+
   return <span className="typewriter" aria-label={text}>{visible}<i aria-hidden="true" /></span>;
 }
 
