@@ -62,10 +62,11 @@ async function ensureState(createIfMissing: boolean) {
   return { sql, row: rows[0], isNew: inserted.length > 0 };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const canEdit = await getAdminStatus();
-    const state = await ensureState(canEdit);
+    const initialize = new URL(request.url).searchParams.get("initialize") === "1";
+    const state = await ensureState(canEdit && initialize);
 
     if (!state?.row) {
       return NextResponse.json({
@@ -74,6 +75,7 @@ export async function GET() {
         canEdit,
         setupRequired: !databaseUrl(),
         isNew: false,
+        hasStoredState: false,
       }, { headers: { "Cache-Control": "no-store" } });
     }
 
@@ -83,6 +85,7 @@ export async function GET() {
       canEdit,
       setupRequired: false,
       isNew: state.isNew,
+      hasStoredState: true,
       updatedAt: state.row.updated_at,
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
@@ -93,6 +96,7 @@ export async function GET() {
       canEdit: false,
       setupRequired: true,
       isNew: false,
+      hasStoredState: false,
       error: "Kalıcı veri okunamadı.",
     }, { status: 503, headers: { "Cache-Control": "no-store" } });
   }
