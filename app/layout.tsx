@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./folder-glass.css";
+import "./home-overrides.css";
 
 export const metadata: Metadata = {
   title: "Startpage — Ömer Yiğitler",
