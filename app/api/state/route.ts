@@ -29,7 +29,7 @@ async function getAdminStatus() {
   return isAdminEmail(session?.user?.email);
 }
 
-async function ensureState() {
+async function ensureState(createIfMissing: boolean) {
   const connectionString = databaseUrl();
   if (!connectionString) return null;
 
@@ -43,13 +43,16 @@ async function ensureState() {
     )
   `;
 
-  const inserted = await sql.query(
-    `INSERT INTO startpage_state (id, config, note)
-     VALUES ($1, $2::jsonb, '')
-     ON CONFLICT (id) DO NOTHING
-     RETURNING id`,
-    [STATE_ID, JSON.stringify(defaultConfig)]
-  );
+  let inserted: unknown[] = [];
+  if (createIfMissing) {
+    inserted = await sql.query(
+      `INSERT INTO startpage_state (id, config, note)
+       VALUES ($1, $2::jsonb, '')
+       ON CONFLICT (id) DO NOTHING
+       RETURNING id`,
+      [STATE_ID, JSON.stringify(defaultConfig)]
+    );
+  }
 
   const rows = await sql.query(
     `SELECT config, note, updated_at FROM startpage_state WHERE id = $1 LIMIT 1`,
@@ -61,15 +64,15 @@ async function ensureState() {
 
 export async function GET() {
   try {
-    const state = await ensureState();
     const canEdit = await getAdminStatus();
+    const state = await ensureState(canEdit);
 
     if (!state?.row) {
       return NextResponse.json({
         config: defaultConfig,
         note: "",
         canEdit,
-        setupRequired: true,
+        setupRequired: !databaseUrl(),
         isNew: false,
       }, { headers: { "Cache-Control": "no-store" } });
     }
@@ -101,7 +104,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 401 });
     }
 
-    const state = await ensureState();
+    const state = await ensureState(true);
     if (!state?.row) {
       return NextResponse.json({ error: "DATABASE_URL yapılandırılmamış." }, { status: 503 });
     }
