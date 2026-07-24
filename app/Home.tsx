@@ -16,6 +16,15 @@ function greetingForHour(hour: number) {
   return "Good Evening.";
 }
 
+function faviconUrl(url: string) {
+  try {
+    const hostname = new URL(url).hostname;
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=128`;
+  } catch {
+    return "https://www.google.com/s2/favicons?domain=google.com&sz=128";
+  }
+}
+
 function Typewriter({ text }: { text: string }) {
   const [visible, setVisible] = useState("");
   useEffect(() => {
@@ -105,9 +114,9 @@ export default function Home() {
 
         <div className="sideSectionHead"><span>Continue working</span><small>{featuredProjects.length} projects</small></div>
         <div className="continueList">
-          {featuredProjects.map((project, index) => <article className="continueCard" key={project.name}>
+          {featuredProjects.map(project => <article className="continueCard" key={project.name}>
             <a className="continueMain" href={project.url} target="_blank" rel="noreferrer">
-              <span>{String(index + 1).padStart(2, "0")}</span><div><strong>{project.name}</strong><small>{project.status || "Project"}</small></div><ArrowUpRight size={16}/>
+              <span className="projectLogo"><img src={faviconUrl(project.url)} alt="" /></span><div><strong>{project.name}</strong><small>{project.status || "Project"}</small></div><ArrowUpRight size={16}/>
             </a>
             <div className="continueMeta">
               {project.github && <a href={project.github} target="_blank" rel="noreferrer"><Github size={13}/> GitHub</a>}
@@ -124,7 +133,7 @@ export default function Home() {
             <header><span>{String(folderIndex + 1).padStart(2, "0")}</span><div><h2>{folder.title}</h2><p>{folder.subtitle}</p></div></header>
             <div className="appGrid">
               {folder.links.slice(0, 6).map((link, linkIndex) => <a href={link.url} target="_blank" rel="noreferrer" key={link.name} className="appTile">
-                <i>{link.name.slice(0, 1).toUpperCase()}</i><strong>{link.name}</strong><small>{link.note || "Open"}</small><b>{String(linkIndex + 1).padStart(2, "0")}</b>
+                <i className="brandLogo"><img src={faviconUrl(link.url)} alt={`${link.name} logosu`} /></i><strong>{link.name}</strong><small>{link.note || "Open"}</small><b>{String(linkIndex + 1).padStart(2, "0")}</b>
               </a>)}
             </div>
           </article>)}
@@ -149,7 +158,7 @@ export default function Home() {
         </article>
         <article className="liveCard quickDesk">
           <header><div><FolderKanban size={17}/><span>Quick access</span></div><small>{config.projects.length}</small></header>
-          <div className="quickLinks">{config.projects.slice(0, 5).map(project => <a href={project.url} target="_blank" rel="noreferrer" key={project.name}><span>{project.name}</span><ArrowUpRight size={14}/></a>)}</div>
+          <div className="quickLinks">{config.projects.slice(0, 5).map(project => <a href={project.url} target="_blank" rel="noreferrer" key={project.name}><span className="quickProject"><img src={faviconUrl(project.url)} alt="" />{project.name}</span><ArrowUpRight size={14}/></a>)}</div>
         </article>
       </aside>
     </section>
