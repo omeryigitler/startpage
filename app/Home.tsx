@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, CalendarDays, Clock3, CloudSun, FolderKanban, Search, Settings2, TrendingUp } from "lucide-react";
-import { defaultConfig, StartpageConfig } from "./yonetim/page";
+import { defaultConfig, StartpageConfig } from "./startpage-config";
 
 const STORAGE_KEY = "startpage-config-v1";
 
