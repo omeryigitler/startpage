@@ -33,10 +33,7 @@ function Typewriter({ text }: { text: string }) {
   useEffect(() => {
     let cancelled = false;
     let timer: number | undefined;
-
-    const wait = (delay: number) => new Promise<void>(resolve => {
-      timer = window.setTimeout(resolve, delay);
-    });
+    const wait = (delay: number) => new Promise<void>(resolve => { timer = window.setTimeout(resolve, delay); });
 
     async function animate() {
       while (!cancelled) {
@@ -143,15 +140,16 @@ export default function Home() {
       <Link className="osManage" href="/yonetim"><Settings2 size={16}/> Yönetim</Link>
     </header>
 
-    <section className="approvedGrid">
-      <section className="approvedMain">
-        <div className="approvedHero"><Typewriter text={greeting} /><p>Bugün ne yapmak istiyorsun?</p></div>
-        <form className="commandSearch" onSubmit={submitSearch}>
-          <div className="commandInput"><Search size={27}/><input ref={searchRef} value={query} onChange={event => setQuery(event.target.value)} placeholder="Proje, araç veya Google araması..." autoFocus/><kbd><Command size={13}/> K</kbd></div>
-          {query && <div className="commandResults">{results.length ? results.map(item => <a href={item.url} key={`${item.group}-${item.name}`}><img src={faviconUrl(item.url)} alt=""/><span><strong>{item.name}</strong><small>{item.group}</small></span><ArrowUpRight size={15}/></a>) : <button type="submit"><Search size={16}/> Google’da “{query}” ara</button>}</div>}
-          <div className="commandShortcuts">{quickLinks.slice(0, 8).map(link => <a href={link.url} target="_blank" rel="noreferrer" key={link.name}><img src={faviconUrl(link.url)} alt=""/><span>{link.name}</span></a>)}</div>
-        </form>
+    <section className="approvedHero fullWidthHero"><Typewriter text={greeting} /><p>Bugün ne yapmak istiyorsun?</p></section>
 
+    <form className="commandSearch fullWidthSearch" onSubmit={submitSearch}>
+      <div className="commandInput"><Search size={27}/><input ref={searchRef} value={query} onChange={event => setQuery(event.target.value)} placeholder="Proje, araç veya Google araması..." autoFocus/><kbd><Command size={13}/> K</kbd></div>
+      {query && <div className="commandResults">{results.length ? results.map(item => <a href={item.url} key={`${item.group}-${item.name}`}><img src={faviconUrl(item.url)} alt=""/><span><strong>{item.name}</strong><small>{item.group}</small></span><ArrowUpRight size={15}/></a>) : <button type="submit"><Search size={16}/> Google’da “{query}” ara</button>}</div>}
+      <div className="commandShortcuts">{quickLinks.slice(0, 8).map(link => <a href={link.url} target="_blank" rel="noreferrer" key={link.name}><img src={faviconUrl(link.url)} alt=""/><span>{link.name}</span></a>)}</div>
+    </form>
+
+    <section className="approvedGrid contentBelowSearch">
+      <section className="approvedMain">
         <section className="glassSection foldersSection">
           <header className="sectionBar"><div><Folder size={18}/><strong>Klasörlerim</strong></div><span>{folders.length} klasör</span></header>
           <div className="folderStrip">{folders.map((folder, index) => <button className={`folderPreview ${selectedFolder === index ? "active" : ""}`} key={folder.title} onClick={() => setSelectedFolder(index)}><div className="folderIcon"><Folder size={29}/></div><strong>{folder.title}</strong><small>{folder.links.length} öğe</small><i>•••</i></button>)}</div>
