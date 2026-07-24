@@ -10,10 +10,10 @@ type WeatherData = { temp: number; feels: number; text: string; high: number; lo
 type MarketData = Record<string, { value: string; change: string }>;
 
 function greetingForHour(hour: number) {
-  if (hour < 5) return "Good Night.";
-  if (hour < 12) return "Good Morning.";
-  if (hour < 18) return "Good Afternoon.";
-  return "Good Evening.";
+  if (hour < 5) return "İyi geceler Ömer";
+  if (hour < 12) return "Günaydın Ömer";
+  if (hour < 18) return "İyi günler Ömer";
+  return "İyi akşamlar Ömer";
 }
 
 function faviconUrl(url: string) {
@@ -87,9 +87,10 @@ export default function Home() {
     window.location.href = target;
   }
 
-  return <main className="osPage">
+  return <main className="osPage reorderedPage">
     <div className="osGlow osGlowOne" />
     <div className="osGlow osGlowTwo" />
+    <div className="brandWatermark" aria-hidden="true">OY</div>
     <div className="noise" />
 
     <header className="osTopbar">
@@ -98,25 +99,23 @@ export default function Home() {
       <Link className="osManage" href="/yonetim"><Settings2 size={16}/> Yönetim</Link>
     </header>
 
-    <section className="osShell">
-      <aside className="osLeft">
-        <div className="osGreeting">
-          <small>PERSONAL OPERATING SYSTEM</small>
-          <Typewriter text={greeting} />
-          <h1>Ömer.</h1>
-          <p>Continue where you left off.</p>
-        </div>
+    <section className="topIntroBlock">
+      <small>PERSONAL OPERATING SYSTEM</small>
+      <Typewriter text={greeting} />
+      <p>Devam ettiğin yerden devam et.</p>
+      <form className="spotlight spotlightLarge" onSubmit={submitSearch}>
+        <Search size={23}/><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Google’da ara veya URL yaz..." autoFocus />
+        <kbd><Command size={13}/> K</kbd>
+      </form>
+    </section>
 
-        <form className="spotlight" onSubmit={submitSearch}>
-          <Search size={19}/><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search anything..." autoFocus />
-          <kbd><Command size={12}/> K</kbd>
-        </form>
-
-        <div className="sideSectionHead"><span>Continue working</span><small>{featuredProjects.length} projects</small></div>
+    <section className="contentShell">
+      <aside className="osLeft projectColumn">
+        <div className="sideSectionHead"><span>Projelerim</span><small>{featuredProjects.length} proje</small></div>
         <div className="continueList">
           {featuredProjects.map(project => <article className="continueCard" key={project.name}>
             <a className="continueMain" href={project.url} target="_blank" rel="noreferrer">
-              <span className="projectLogo"><img src={faviconUrl(project.url)} alt="" /></span><div><strong>{project.name}</strong><small>{project.status || "Project"}</small></div><ArrowUpRight size={16}/>
+              <span className="projectLogo"><img src={faviconUrl(project.url)} alt="" /></span><div><strong>{project.name}</strong><small>{project.status || "Proje"}</small></div><ArrowUpRight size={16}/>
             </a>
             <div className="continueMeta">
               {project.github && <a href={project.github} target="_blank" rel="noreferrer"><Github size={13}/> GitHub</a>}
@@ -126,38 +125,38 @@ export default function Home() {
         </div>
       </aside>
 
-      <section className="osCenter">
-        <div className="columnTitle"><div><Sparkles size={17}/><span>Workspace</span></div><small>Your daily launchpad</small></div>
+      <section className="osCenter folderColumn">
+        <div className="columnTitle"><div><Sparkles size={17}/><span>Klasörler</span></div><small>Günlük çalışma alanın</small></div>
         <div className="launchGrid">
           {toolFolders.map((folder, folderIndex) => <article className="launchFolder" key={folder.title}>
             <header><span>{String(folderIndex + 1).padStart(2, "0")}</span><div><h2>{folder.title}</h2><p>{folder.subtitle}</p></div></header>
             <div className="appGrid">
               {folder.links.slice(0, 6).map((link, linkIndex) => <a href={link.url} target="_blank" rel="noreferrer" key={link.name} className="appTile">
-                <i className="brandLogo"><img src={faviconUrl(link.url)} alt={`${link.name} logosu`} /></i><strong>{link.name}</strong><small>{link.note || "Open"}</small><b>{String(linkIndex + 1).padStart(2, "0")}</b>
+                <i className="brandLogo"><img src={faviconUrl(link.url)} alt={`${link.name} logosu`} /></i><strong>{link.name}</strong><small>{link.note || "Aç"}</small><b>{String(linkIndex + 1).padStart(2, "0")}</b>
               </a>)}
             </div>
           </article>)}
         </div>
       </section>
 
-      <aside className="osRight">
-        <div className="columnTitle"><div><Wrench size={17}/><span>Live desk</span></div><small>Now</small></div>
+      <aside className="osRight liveColumn">
+        <div className="columnTitle"><div><Wrench size={17}/><span>Canlı takip</span></div><small>Şimdi</small></div>
         <article className="liveCard weatherDesk">
-          <header><div><CloudSun size={17}/><span>Weather</span></div><small>Live</small></header>
+          <header><div><CloudSun size={17}/><span>Hava Durumu</span></div><small>Canlı</small></header>
           <div className="weatherStack">{config.cities.map(city => {
             const data = weather[`${city.name}-${city.country}`];
-            return <div className="weatherRow" key={`${city.name}-${city.country}`}><div><strong>{city.name}</strong><small>{city.country}</small></div><div><b>{data ? `${data.temp}°` : "—"}</b><span>{data?.text || "Loading"}</span></div></div>;
+            return <div className="weatherRow" key={`${city.name}-${city.country}`}><div><strong>{city.name}</strong><small>{city.country}</small></div><div><b>{data ? `${data.temp}°` : "—"}</b><span>{data?.text || "Yükleniyor"}</span></div></div>;
           })}</div>
         </article>
         <article className="liveCard marketDesk">
-          <header><div><TrendingUp size={17}/><span>Markets</span></div><small>5 min</small></header>
+          <header><div><TrendingUp size={17}/><span>Piyasalar</span></div><small>5 dk</small></header>
           <div className="marketStack">{config.markets.map(item => {
             const data = markets[item.symbol];
             return <div className="marketRow" key={item.symbol}><div><strong>{item.name}</strong><small>{item.symbol}</small></div><div><b>{data?.value || "—"}</b><span className={data?.change?.startsWith("-") ? "negative" : "positive"}>{data?.change || "—"}</span></div></div>;
           })}</div>
         </article>
         <article className="liveCard quickDesk">
-          <header><div><FolderKanban size={17}/><span>Quick access</span></div><small>{config.projects.length}</small></header>
+          <header><div><FolderKanban size={17}/><span>Hızlı Erişim</span></div><small>{config.projects.length}</small></header>
           <div className="quickLinks">{config.projects.slice(0, 5).map(project => <a href={project.url} target="_blank" rel="noreferrer" key={project.name}><span className="quickProject"><img src={faviconUrl(project.url)} alt="" />{project.name}</span><ArrowUpRight size={14}/></a>)}</div>
         </article>
       </aside>
