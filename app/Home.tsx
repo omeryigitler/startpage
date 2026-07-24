@@ -74,9 +74,15 @@ export default function Home() {
   const searchRef = useRef<HTMLInputElement>(null);
   const noteSaveTimer = useRef<number | null>(null);
 
+  function focusSearch() {
+    searchRef.current?.focus();
+    searchRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) try { setConfig({ ...defaultConfig, ...JSON.parse(raw) }); } catch {}
+    setNote(localStorage.getItem(NOTE_KEY) || "");
 
     async function loadState() {
       try {
@@ -92,24 +98,28 @@ export default function Home() {
         if (data.canEdit && typeof data.note === "string") {
           setNote(data.note);
           localStorage.setItem(NOTE_KEY, data.note);
-        } else if (data.setupRequired || !response.ok) {
-          setNote(localStorage.getItem(NOTE_KEY) || "");
         }
-      } catch {
-        setNote(localStorage.getItem(NOTE_KEY) || "");
-      }
+      } catch {}
     }
 
     loadState();
     const timer = window.setInterval(() => setNow(new Date()), 1000);
     const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isTyping = target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable;
+
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        searchRef.current?.focus();
+        focusSearch();
+      }
+      if (event.key === "/" && !isTyping) {
+        event.preventDefault();
+        focusSearch();
       }
       if (event.key === "Escape") {
         setQuery("");
         setSelectedFolder(null);
+        searchRef.current?.blur();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -183,7 +193,7 @@ export default function Home() {
     <section className="approvedHero fullWidthHero"><Typewriter text={greeting} /><p>Bugün ne yapmak istiyorsun?</p></section>
 
     <form className="commandSearch fullWidthSearch" onSubmit={submitSearch}>
-      <div className="commandInput"><Search size={27}/><input ref={searchRef} value={query} onChange={event => setQuery(event.target.value)} placeholder="Proje, araç veya Google araması..." autoFocus/><kbd><Command size={13}/> K</kbd></div>
+      <div className="commandInput"><Search size={27}/><input ref={searchRef} value={query} onChange={event => setQuery(event.target.value)} placeholder="Proje, araç veya Google araması..." autoFocus/><button type="button" className="searchShortcut" onClick={focusSearch} aria-label="Arama alanına odaklan"><Command size={13}/> K <span>/</span></button></div>
       {query && <div className="commandResults">{results.length ? results.map(item => <a href={item.url} key={`${item.group}-${item.name}`}><img src={faviconUrl(item.url)} alt=""/><span><strong>{item.name}</strong><small>{item.group}</small></span><ArrowUpRight size={15}/></a>) : <button type="submit"><Search size={16}/> Google’da “{query}” ara</button>}</div>}
       <div className="commandShortcuts">{quickLinks.slice(0, 8).map(link => <a href={link.url} target="_blank" rel="noreferrer" key={link.name}><img src={faviconUrl(link.url)} alt=""/><span>{link.name}</span></a>)}</div>
     </form>
@@ -205,7 +215,7 @@ export default function Home() {
         <article className="glassWidget weatherWidget"><header><div><CloudSun size={18}/><strong>Hava Durumu</strong></div><span>Canlı</span></header>{config.cities.slice(0,3).map((city, index) => { const data = weather[`${city.name}-${city.country}`]; return <div className={`featuredWeather ${index ? "compact" : ""}`} key={`${city.name}-${city.country}`}><div><strong>{city.name}, {city.country}</strong><small>{data?.text || "Yükleniyor"}</small>{!index && <span>Hissedilen {data?.feels ?? "—"}°</span>}</div><b>{data ? `${data.temp}°` : "—"}</b>{!index && <dl><div><dt>Rüzgâr</dt><dd>{data?.wind ?? "—"} km/h</dd></div><div><dt>Yağış</dt><dd>%{data?.rain ?? "—"}</dd></div></dl>}</div> })}</article>
         <article className="glassWidget marketsWidget"><header><div><TrendingUp size={18}/><strong>Piyasalar</strong></div><span>5 dk gecikmeli</span></header><div className="marketRows">{config.markets.slice(0,5).map((item,index) => { const data=markets[item.symbol]; return <div className="marketLine" key={item.symbol}><div><strong>{item.symbol}</strong><small>{item.name}</small></div><svg viewBox="0 0 74 22" aria-hidden="true"><polyline points={index % 2 ? "0,8 10,12 18,7 29,14 40,9 52,13 64,6 74,10" : "0,16 9,12 18,14 28,7 38,10 48,4 60,8 74,3"}/></svg><b>{data?.value || "—"}</b><span className={data?.change?.startsWith("-") ? "negative" : "positive"}>{data?.change || "—"}</span></div>})}</div></article>
         <article className="glassWidget summaryWidget"><header><div><CheckCircle2 size={18}/><strong>Bugünün Özeti</strong></div></header><div className="summaryRows"><div><Folder size={16}/><span>{config.projects.length} aktif proje</span></div><div><CheckCircle2 size={16}/><span>{config.folders.length} çalışma klasörü</span></div><div><Mail size={16}/><span>{quickLinks.length} hızlı bağlantı</span></div><div><Github size={16}/><span>GitHub çalışma alanın hazır</span></div></div></article>
-        <article className="glassWidget noteWidget"><header><div><Sparkles size={18}/><strong>Hızlı Not</strong></div><span>{canEdit ? "Senkronize" : "Giriş gerekli"}</span></header><textarea value={note} readOnly={!canEdit} onChange={event => saveNote(event.target.value)} placeholder={canEdit ? "Not almak için yaz..." : "Notları düzenlemek için yönetim girişi yap."}/></article>
+        <article className="glassWidget noteWidget"><header><div><Sparkles size={18}/><strong>Hızlı Not</strong></div><span>{canEdit ? "Senkronize" : "Bu cihazda"}</span></header><textarea value={note} onChange={event => saveNote(event.target.value)} placeholder="Not almak için yaz..."/></article>
       </aside>
     </section>
 
