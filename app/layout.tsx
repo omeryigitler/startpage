@@ -3,6 +3,7 @@ import "./globals.css";
 import "./folder-glass.css";
 import "./home-overrides.css";
 import "./active-home.css";
+import "./full-width-search.css";
 
 export const metadata: Metadata = {
   title: "Startpage — Ömer Yiğitler",
