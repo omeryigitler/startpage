@@ -10,6 +10,7 @@ const NOTE_KEY = "startpage-quick-note";
 type WeatherData = { temp: number; feels: number; text: string; high: number; low: number; rain: number; wind: number };
 type MarketData = Record<string, { value: string; change: string }>;
 type SearchItem = { name: string; url: string; group: string };
+type StatePayload = { config?: StartpageConfig; note?: string; canEdit?: boolean; setupRequired?: boolean; hasStoredState?: boolean };
 
 function greetingForHour(hour: number) {
   if (hour < 5) return "İyi geceler, Ömer.";
@@ -68,13 +69,38 @@ export default function Home() {
   const [weather, setWeather] = useState<Record<string, WeatherData>>({});
   const [markets, setMarkets] = useState<MarketData>({});
   const [note, setNote] = useState("");
+  const [canEdit, setCanEdit] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const noteSaveTimer = useRef<number | null>(null);
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) try { setConfig({ ...defaultConfig, ...JSON.parse(raw) }); } catch {}
-    setNote(localStorage.getItem(NOTE_KEY) || "");
+
+    async function loadState() {
+      try {
+        const response = await fetch("/api/state", { cache: "no-store" });
+        const data = await response.json() as StatePayload;
+        setCanEdit(Boolean(data.canEdit));
+
+        if (response.ok && data.hasStoredState && data.config) {
+          setConfig(data.config);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data.config));
+        }
+
+        if (data.canEdit && typeof data.note === "string") {
+          setNote(data.note);
+          localStorage.setItem(NOTE_KEY, data.note);
+        } else if (data.setupRequired || !response.ok) {
+          setNote(localStorage.getItem(NOTE_KEY) || "");
+        }
+      } catch {
+        setNote(localStorage.getItem(NOTE_KEY) || "");
+      }
+    }
+
+    loadState();
     const timer = window.setInterval(() => setNow(new Date()), 1000);
     const onKey = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
@@ -87,7 +113,11 @@ export default function Home() {
       }
     };
     window.addEventListener("keydown", onKey);
-    return () => { window.clearInterval(timer); window.removeEventListener("keydown", onKey); };
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("keydown", onKey);
+      if (noteSaveTimer.current) window.clearTimeout(noteSaveTimer.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -130,6 +160,16 @@ export default function Home() {
   function saveNote(value: string) {
     setNote(value);
     localStorage.setItem(NOTE_KEY, value);
+    if (!canEdit) return;
+
+    if (noteSaveTimer.current) window.clearTimeout(noteSaveTimer.current);
+    noteSaveTimer.current = window.setTimeout(() => {
+      fetch("/api/state", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note: value }),
+      }).catch(() => {});
+    }, 650);
   }
 
   return <main className="osPage approvedHome">
@@ -165,7 +205,7 @@ export default function Home() {
         <article className="glassWidget weatherWidget"><header><div><CloudSun size={18}/><strong>Hava Durumu</strong></div><span>Canlı</span></header>{config.cities.slice(0,3).map((city, index) => { const data = weather[`${city.name}-${city.country}`]; return <div className={`featuredWeather ${index ? "compact" : ""}`} key={`${city.name}-${city.country}`}><div><strong>{city.name}, {city.country}</strong><small>{data?.text || "Yükleniyor"}</small>{!index && <span>Hissedilen {data?.feels ?? "—"}°</span>}</div><b>{data ? `${data.temp}°` : "—"}</b>{!index && <dl><div><dt>Rüzgâr</dt><dd>{data?.wind ?? "—"} km/h</dd></div><div><dt>Yağış</dt><dd>%{data?.rain ?? "—"}</dd></div></dl>}</div> })}</article>
         <article className="glassWidget marketsWidget"><header><div><TrendingUp size={18}/><strong>Piyasalar</strong></div><span>5 dk gecikmeli</span></header><div className="marketRows">{config.markets.slice(0,5).map((item,index) => { const data=markets[item.symbol]; return <div className="marketLine" key={item.symbol}><div><strong>{item.symbol}</strong><small>{item.name}</small></div><svg viewBox="0 0 74 22" aria-hidden="true"><polyline points={index % 2 ? "0,8 10,12 18,7 29,14 40,9 52,13 64,6 74,10" : "0,16 9,12 18,14 28,7 38,10 48,4 60,8 74,3"}/></svg><b>{data?.value || "—"}</b><span className={data?.change?.startsWith("-") ? "negative" : "positive"}>{data?.change || "—"}</span></div>})}</div></article>
         <article className="glassWidget summaryWidget"><header><div><CheckCircle2 size={18}/><strong>Bugünün Özeti</strong></div></header><div className="summaryRows"><div><Folder size={16}/><span>{config.projects.length} aktif proje</span></div><div><CheckCircle2 size={16}/><span>{config.folders.length} çalışma klasörü</span></div><div><Mail size={16}/><span>{quickLinks.length} hızlı bağlantı</span></div><div><Github size={16}/><span>GitHub çalışma alanın hazır</span></div></div></article>
-        <article className="glassWidget noteWidget"><header><div><Sparkles size={18}/><strong>Hızlı Not</strong></div></header><textarea value={note} onChange={event => saveNote(event.target.value)} placeholder="Not almak için yaz..."/></article>
+        <article className="glassWidget noteWidget"><header><div><Sparkles size={18}/><strong>Hızlı Not</strong></div><span>{canEdit ? "Senkronize" : "Giriş gerekli"}</span></header><textarea value={note} readOnly={!canEdit} onChange={event => saveNote(event.target.value)} placeholder={canEdit ? "Not almak için yaz..." : "Notları düzenlemek için yönetim girişi yap."}/></article>
       </aside>
     </section>
 
