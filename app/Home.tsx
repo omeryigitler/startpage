@@ -2,23 +2,30 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 import {
-  ArrowLeft,
-  ArrowRight,
+  Activity,
   ArrowUpRight,
   Bot,
+  BrainCircuit,
   Clock3,
   CloudSun,
   Command,
-  Folder,
-  FolderOpen,
+  FolderKanban,
   Gauge,
+  LayoutDashboard,
+  Link2,
   MapPin,
+  MessagesSquare,
   NotebookPen,
+  Palette,
+  Radar,
   Search,
   Settings2,
+  SlidersHorizontal,
   Sparkles,
   TrendingUp,
+  Workflow,
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -55,15 +62,17 @@ type FolderSlide =
 
 const slideVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 130 : -130,
+    x: direction > 0 ? 120 : -120,
     opacity: 0,
-    scale: 0.95,
+    scale: 0.965,
+    filter: "blur(8px)",
   }),
-  center: { x: 0, opacity: 1, scale: 1 },
+  center: { x: 0, opacity: 1, scale: 1, filter: "blur(0px)" },
   exit: (direction: number) => ({
-    x: direction < 0 ? 130 : -130,
+    x: direction < 0 ? 120 : -120,
     opacity: 0,
-    scale: 0.95,
+    scale: 0.965,
+    filter: "blur(8px)",
   }),
 };
 
@@ -81,6 +90,20 @@ function faviconUrl(url: string) {
   } catch {
     return "https://www.google.com/s2/favicons?domain=google.com&sz=128";
   }
+}
+
+function iconForSlide(slide: FolderSlide): LucideIcon {
+  if (slide.kind === "projects") return FolderKanban;
+  if (slide.kind === "daily") return Activity;
+  if (slide.kind === "system") return SlidersHorizontal;
+
+  const title = slide.title.toLocaleLowerCase("tr");
+  if (title.includes("çalışma") || title.includes("araç")) return Workflow;
+  if (title.includes("yapay") || title.includes("zekâ") || title.includes("zeka")) return BrainCircuit;
+  if (title.includes("tasarım")) return Palette;
+  if (title.includes("sosyal") || title.includes("iletişim")) return MessagesSquare;
+  if (title.includes("araştırma")) return Radar;
+  return LayoutDashboard;
 }
 
 export default function Home() {
@@ -145,6 +168,9 @@ export default function Home() {
   const leftIndex = (normalizedIndex - 1 + slides.length) % slides.length;
   const rightIndex = (normalizedIndex + 1) % slides.length;
   const folderIsOpen = openFolderId === currentSlide.id;
+  const CurrentIcon = iconForSlide(currentSlide);
+  const LeftIcon = iconForSlide(slides[leftIndex]);
+  const RightIcon = iconForSlide(slides[rightIndex]);
 
   function launchAndFocus() {
     setLaunched(true);
@@ -292,10 +318,12 @@ export default function Home() {
         <div className="folderLinkGrid">
           {slide.links.map((link) => (
             <a href={link.url} target="_blank" rel="noreferrer" key={`${slide.id}-${link.name}`}>
-              <img src={faviconUrl(link.url)} alt="" />
+              <span className="taurusLinkIcon">
+                <img src={faviconUrl(link.url)} alt="" />
+              </span>
               <span>
                 <strong>{link.name}</strong>
-                <small>{link.note || "Aç"}</small>
+                <small>{link.note || "Bağlantıyı aç"}</small>
               </span>
               <ArrowUpRight size={17} />
             </a>
@@ -310,7 +338,9 @@ export default function Home() {
           {config.projects.map((project, index) => (
             <a href={project.url} target="_blank" rel="noreferrer" key={project.name}>
               <span className="projectNumber">{String(index + 1).padStart(2, "0")}</span>
-              <img src={faviconUrl(project.url)} alt="" />
+              <span className="taurusLinkIcon">
+                <img src={faviconUrl(project.url)} alt="" />
+              </span>
               <div>
                 <strong>{project.name}</strong>
                 <small>{project.status || "Aktif proje"}</small>
@@ -328,7 +358,7 @@ export default function Home() {
           <article className="dailyPanel weatherPanel">
             <header>
               <span><CloudSun size={18} /> Hava</span>
-              <small>Canlı</small>
+              <small>CANLI</small>
             </header>
             {config.cities.slice(0, 3).map((city) => {
               const data = weather[`${city.name}-${city.country}`];
@@ -347,7 +377,7 @@ export default function Home() {
           <article className="dailyPanel marketPanel">
             <header>
               <span><TrendingUp size={18} /> Piyasalar</span>
-              <small>5 dk gecikmeli</small>
+              <small>5 DK</small>
             </header>
             {config.markets.slice(0, 5).map((item) => {
               const data = markets[item.symbol];
@@ -368,7 +398,7 @@ export default function Home() {
 
           <article className="dailyPanel dayStatusPanel">
             <header>
-              <span><Clock3 size={18} /> Bugün</span>
+              <span><Clock3 size={18} /> Sistem Saati</span>
             </header>
             <strong>{now.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}</strong>
             <p>{date}</p>
@@ -405,13 +435,21 @@ export default function Home() {
   }
 
   return (
-    <main className={`centerOs ${launched ? "is-launched" : ""} ${workspaceOpen ? "is-workspace" : ""}`}>
+    <main className={`centerOs taurusStartpage ${launched ? "is-launched" : ""} ${workspaceOpen ? "is-workspace" : ""}`}>
       <div className="centerOsGrid" />
+      <div className="taurusScanlines" />
       <div className="centerOsGlow centerOsGlowOne" />
       <div className="centerOsGlow centerOsGlowTwo" />
 
+      <div className="taurusSystemBar" aria-hidden={!launched}>
+        <span className="taurusSystemState"><i /> SYS-V8: STARTPAGE ACTIVE</span>
+        <b>TAURUS OS</b>
+        <span>{now.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}</span>
+      </div>
+
       <section className="centerLogoDock">
         <button type="button" className="centerLogoButton" onClick={launchAndFocus} aria-label="Startpage'i aç">
+          <span className="logoScanLine" />
           {logoMissing ? (
             <span className="centerLogoFallback">OY<span>.</span></span>
           ) : (
@@ -422,24 +460,26 @@ export default function Home() {
 
       <section className="searchExpansion">
         <form className="centerSearchForm" onSubmit={submitSearch}>
-          <Search size={23} />
+          <Search size={21} />
           <input
             ref={searchRef}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Proje, araç veya Google araması..."
+            placeholder="GLOBAL COMMAND..."
           />
           <button type="button" onClick={launchAndFocus} aria-label="Arama alanına odaklan">
             <Command size={13} /> K <span>/</span>
           </button>
         </form>
-        <p className="centerGreeting"><Sparkles size={14} /> {greeting}</p>
+        <p className="centerGreeting"><Sparkles size={14} /><span>$</span> {greeting}</p>
         {query && (
           <div className="centerSearchResults">
             {results.length ? (
               results.map((item) => (
                 <a href={item.url} key={`${item.group}-${item.name}`}>
-                  <img src={faviconUrl(item.url)} alt="" />
+                  <span className="taurusLinkIcon">
+                    <img src={faviconUrl(item.url)} alt="" />
+                  </span>
                   <span><strong>{item.name}</strong><small>{item.group}</small></span>
                   <ArrowUpRight size={15} />
                 </a>
@@ -455,9 +495,10 @@ export default function Home() {
         <div className={`folderFrame ${folderIsOpen ? "folder-is-open" : ""}`}>
           <button type="button" className="sideFolder sideFolderLeft" onClick={() => paginate(-1)}>
             <span className="folderTab" />
-            <Folder size={36} />
+            <span className="folderModuleCode">MOD {String(leftIndex + 1).padStart(2, "0")}</span>
+            <span className="sideFolderIcon"><LeftIcon size={31} /></span>
             <strong>{slides[leftIndex].title}</strong>
-            <small>Önceki</small>
+            <small>{slides[leftIndex].subtitle}</small>
           </button>
 
           <div className="activeFolderStage">
@@ -471,16 +512,16 @@ export default function Home() {
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  transition={{ type: "tween", duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+                  transition={{ type: "tween", duration: 0.72, ease: [0.25, 0.1, 0.25, 1] }}
                 >
                   <header className="activeFolderHeader">
-                    <div className="activeFolderMark"><FolderOpen size={28} /></div>
+                    <div className="activeFolderMark"><CurrentIcon size={27} /></div>
                     <div>
-                      <small>KLASÖR {String(normalizedIndex + 1).padStart(2, "0")}</small>
+                      <small>MODULE {String(normalizedIndex + 1).padStart(2, "0")} / ONLINE</small>
                       <h1>{currentSlide.title}</h1>
                       <p>{currentSlide.subtitle}</p>
                     </div>
-                    <button type="button" className="closeFolderButton" onClick={() => setOpenFolderId(null)} aria-label="Klasörü kapat">
+                    <button type="button" className="closeFolderButton" onClick={() => setOpenFolderId(null)} aria-label="Modülü kapat">
                       <X size={20} />
                     </button>
                   </header>
@@ -496,10 +537,10 @@ export default function Home() {
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  transition={{ type: "tween", duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+                  transition={{ type: "tween", duration: 0.72, ease: [0.25, 0.1, 0.25, 1] }}
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.16}
+                  dragElastic={0.14}
                   onDragEnd={(_, info) => {
                     if (info.offset.x < -60) paginate(1);
                     if (info.offset.x > 60) paginate(-1);
@@ -507,11 +548,13 @@ export default function Home() {
                   onClick={() => setOpenFolderId(currentSlide.id)}
                 >
                   <span className="folderTab" />
-                  <span className="centerFolderIcon"><FolderOpen size={76} /></span>
-                  <small>KLASÖR {String(normalizedIndex + 1).padStart(2, "0")}</small>
+                  <span className="folderScanLine" />
+                  <span className="folderModuleStatus"><i /> MODULE ONLINE</span>
+                  <span className="centerFolderIcon"><CurrentIcon size={58} /></span>
+                  <small>MODULE {String(normalizedIndex + 1).padStart(2, "0")}</small>
                   <h1>{currentSlide.title}</h1>
                   <p>{currentSlide.subtitle}</p>
-                  <span className="folderOpenHint">Aç</span>
+                  <span className="folderEnter"><Link2 size={13} /> ENTER MODULE</span>
                 </motion.button>
               )}
             </AnimatePresence>
@@ -519,15 +562,13 @@ export default function Home() {
 
           <button type="button" className="sideFolder sideFolderRight" onClick={() => paginate(1)}>
             <span className="folderTab" />
-            <Folder size={36} />
+            <span className="folderModuleCode">MOD {String(rightIndex + 1).padStart(2, "0")}</span>
+            <span className="sideFolderIcon"><RightIcon size={31} /></span>
             <strong>{slides[rightIndex].title}</strong>
-            <small>Sonraki</small>
+            <small>{slides[rightIndex].subtitle}</small>
           </button>
 
           <footer className="folderSliderFooter">
-            <button type="button" onClick={() => paginate(-1)} className="sliderDirection sliderDirectionLeft">
-              <span>PREVIOUS</span><i /><ArrowLeft size={17} />
-            </button>
             <div className="folderDots">
               {slides.map((slide, index) => (
                 <button
@@ -535,13 +576,10 @@ export default function Home() {
                   key={slide.id}
                   className={index === normalizedIndex ? "active" : ""}
                   onClick={() => selectSlide(index)}
-                  aria-label={`${slide.title} klasörüne git`}
+                  aria-label={`${slide.title} modülüne git`}
                 />
               ))}
             </div>
-            <button type="button" onClick={() => paginate(1)} className="sliderDirection sliderDirectionRight">
-              <ArrowRight size={17} /><i /><span>NEXT</span>
-            </button>
           </footer>
         </div>
       </section>
