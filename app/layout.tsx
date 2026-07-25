@@ -9,6 +9,8 @@ import "./center-os-slider.css";
 import "./center-os-responsive.css";
 import "./folder-premium.css";
 import "./taurus-startpage.css";
+import "./taurus-console.css";
+import TaurusTicker from "./TaurusTicker";
 
 export const metadata: Metadata = {
   title: "Startpage — Ömer Yiğitler",
@@ -18,7 +20,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="tr">
-      <body>{children}</body>
+      <body>
+        {children}
+        <TaurusTicker />
+      </body>
     </html>
   );
 }
