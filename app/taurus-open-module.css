@@ -1,0 +1,97 @@
+/* Open modules need more room than their compact covers. Imported last. */
+
+@media (min-width: 981px) {
+  .taurusStartpage .folderWorkspace:has(.folderFrame.folder-is-open) {
+    top: 56% !important;
+    height: 500px !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open {
+    width: min(1280px, calc(100vw - 64px)) !important;
+    height: 470px !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .activeFolderStage {
+    top: 0 !important;
+    width: min(880px, calc(100vw - 300px)) !important;
+    max-width: none !important;
+    height: 420px !important;
+    min-height: 420px !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .activeFolderContent {
+    padding: 20px !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .dailyFolderGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr) minmax(190px, .78fr) !important;
+    gap: 14px !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .sideFolder {
+    opacity: .1 !important;
+    filter: saturate(.35) !important;
+    pointer-events: none !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .sideFolderLeft {
+    transform: translateY(-50%) scale(.66) !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .sideFolderRight {
+    transform: translateY(-50%) scale(.66) !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .folderSliderFooter {
+    bottom: 0 !important;
+  }
+}
+
+@media (max-width: 980px) and (min-width: 681px) {
+  .taurusStartpage .folderWorkspace:has(.folderFrame.folder-is-open) {
+    top: 56% !important;
+    height: 480px !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open {
+    height: 455px !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .activeFolderStage {
+    top: 0 !important;
+    width: calc(100% - 100px) !important;
+    max-width: none !important;
+    height: 410px !important;
+    min-height: 410px !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .dailyFolderGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .dayStatusPanel {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .taurusStartpage .folderWorkspace:has(.folderFrame.folder-is-open) {
+    top: 56% !important;
+    height: min(70vh, 540px) !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open {
+    height: min(68vh, 520px) !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .activeFolderStage {
+    top: 0 !important;
+    width: calc(100% - 26px) !important;
+    height: min(64vh, 490px) !important;
+    min-height: 360px !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .activeFolderContent {
+    padding: 12px !important;
+  }
+}
