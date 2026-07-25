@@ -4,6 +4,9 @@ import "./folder-glass.css";
 import "./home-overrides.css";
 import "./active-home.css";
 import "./full-width-search.css";
+import "./center-os-base.css";
+import "./center-os-slider.css";
+import "./center-os-responsive.css";
 
 export const metadata: Metadata = {
   title: "Startpage — Ömer Yiğitler",
