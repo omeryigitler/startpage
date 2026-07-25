@@ -10,6 +10,7 @@ import "./center-os-responsive.css";
 import "./folder-premium.css";
 import "./taurus-startpage.css";
 import "./taurus-console.css";
+import "./taurus-carousel-fix.css";
 import TaurusTicker from "./TaurusTicker";
 
 export const metadata: Metadata = {
