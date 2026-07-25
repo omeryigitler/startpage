@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { StartpageConfig } from "./startpage-config";
+import { defaultConfig, type StartpageConfig } from "./startpage-config";
 
 type MarketQuote = { value: string; change: string };
 type MarketMap = Record<string, MarketQuote>;
@@ -17,6 +17,7 @@ type TickerItem = {
 export default function TaurusTicker() {
   const [visible, setVisible] = useState(false);
   const [items, setItems] = useState<TickerItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>(".taurusStartpage");
@@ -34,29 +35,38 @@ export default function TaurusTicker() {
     let cancelled = false;
 
     async function loadTicker() {
+      setLoading(true);
       try {
+        let configured = defaultConfig.markets.slice(0, 8);
+
         const stateResponse = await fetch("/api/state", { cache: "no-store" });
-        const state = (await stateResponse.json()) as StatePayload;
-        const configured = state.config?.markets?.filter((item) => item.symbol).slice(0, 8) || [];
-        if (!configured.length) return;
+        if (stateResponse.ok) {
+          const state = (await stateResponse.json()) as StatePayload;
+          const stored = state.config?.markets?.filter((item) => item.symbol).slice(0, 8);
+          if (stored?.length) configured = stored;
+        }
 
         const symbols = configured.map((item) => item.symbol).join(",");
         const marketResponse = await fetch(`/api/markets?symbols=${encodeURIComponent(symbols)}`, { cache: "no-store" });
-        if (!marketResponse.ok) return;
+        if (!marketResponse.ok) throw new Error("market");
 
         const quotes = (await marketResponse.json()) as MarketMap;
         if (cancelled) return;
 
         setItems(
-          configured.map((item) => ({
-            symbol: item.symbol,
-            name: item.name,
-            value: quotes[item.symbol]?.value || "—",
-            change: quotes[item.symbol]?.change || "—",
-          })),
+          configured
+            .filter((item) => quotes[item.symbol])
+            .map((item) => ({
+              symbol: item.symbol,
+              name: item.name,
+              value: quotes[item.symbol].value,
+              change: quotes[item.symbol].change,
+            })),
         );
       } catch {
         if (!cancelled) setItems([]);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     }
 
@@ -75,7 +85,7 @@ export default function TaurusTicker() {
 
   return (
     <aside className={`taurusMarketTicker ${visible ? "is-visible" : ""}`} aria-label="Canlı piyasa bandı">
-      <div className="taurusTickerLabel">MARKET FEED</div>
+      <div className="taurusTickerLabel">MARKET</div>
       <div className="taurusTickerViewport">
         {loopItems.length ? (
           <div className="taurusTickerTrack">
@@ -89,10 +99,10 @@ export default function TaurusTicker() {
             ))}
           </div>
         ) : (
-          <div className="taurusTickerEmpty">PIYASA VERİSİ BEKLENİYOR</div>
+          <div className="taurusTickerEmpty">{loading ? "PİYASA BAĞLANTISI KURULUYOR" : "PİYASA VERİSİ ALINAMADI"}</div>
         )}
       </div>
-      <div className="taurusTickerDelay">5 DK GECİKMELİ</div>
+      <div className="taurusTickerDelay">5 DK</div>
     </aside>
   );
 }
