@@ -34,11 +34,11 @@ export default function BrandLogo() {
 
   return (
     <a
-      href="/yonetim/agent"
+      href="https://omeryigitler.com/agent.html"
       target="_blank"
       rel="noreferrer"
-      aria-label="Startpage Agent'i aç"
-      title="Startpage Agent'i aç"
+      aria-label="Taurus Agent'i aç"
+      title="Taurus Agent'i aç"
       style={linkStyle}
     >
       {missing ? (
