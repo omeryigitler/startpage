@@ -78,25 +78,35 @@ export default function TaurusTicker() {
     };
   }, []);
 
-  const loopItems = useMemo(() => {
+  const groupItems = useMemo(() => {
     if (!items.length) return [];
-    return [...items, ...items];
+    const repeatCount = Math.max(2, Math.ceil(16 / items.length));
+    return Array.from({ length: repeatCount }, () => items).flat();
   }, [items]);
+
+  function renderGroup(group: number) {
+    return (
+      <div className="taurusTickerGroup" aria-hidden={group === 1}>
+        {groupItems.map((item, index) => (
+          <div className="taurusTickerItem" key={`${group}-${item.symbol}-${index}`}>
+            <strong>{item.symbol}</strong>
+            <span>{item.value}</span>
+            <em className={item.change.startsWith("-") ? "down" : "up"}>{item.change}</em>
+            <small>{item.name}</small>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <aside className={`taurusMarketTicker ${visible ? "is-visible" : ""}`} aria-label="Canlı piyasa bandı">
       <div className="taurusTickerLabel">MARKET</div>
       <div className="taurusTickerViewport">
-        {loopItems.length ? (
+        {groupItems.length ? (
           <div className="taurusTickerTrack">
-            {loopItems.map((item, index) => (
-              <div className="taurusTickerItem" key={`${item.symbol}-${index}`}>
-                <strong>{item.symbol}</strong>
-                <span>{item.value}</span>
-                <em className={item.change.startsWith("-") ? "down" : "up"}>{item.change}</em>
-                <small>{item.name}</small>
-              </div>
-            ))}
+            {renderGroup(0)}
+            {renderGroup(1)}
           </div>
         ) : (
           <div className="taurusTickerEmpty">{loading ? "PİYASA BAĞLANTISI KURULUYOR" : "PİYASA VERİSİ ALINAMADI"}</div>
