@@ -7,8 +7,6 @@ import {
   ArrowRight,
   ArrowUpRight,
   Bot,
-  CalendarDays,
-  ChevronDown,
   Clock3,
   CloudSun,
   Command,
@@ -21,6 +19,7 @@ import {
   Settings2,
   Sparkles,
   TrendingUp,
+  X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { defaultConfig, StartpageConfig } from "./startpage-config";
@@ -56,15 +55,15 @@ type FolderSlide =
 
 const slideVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 120 : -120,
+    x: direction > 0 ? 130 : -130,
     opacity: 0,
-    scale: 0.96,
+    scale: 0.95,
   }),
   center: { x: 0, opacity: 1, scale: 1 },
   exit: (direction: number) => ({
-    x: direction < 0 ? 120 : -120,
+    x: direction < 0 ? 130 : -130,
     opacity: 0,
-    scale: 0.96,
+    scale: 0.95,
   }),
 };
 
@@ -87,7 +86,6 @@ function faviconUrl(url: string) {
 export default function Home() {
   const [launched, setLaunched] = useState(false);
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
-  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [logoMissing, setLogoMissing] = useState(false);
   const [query, setQuery] = useState("");
   const [now, setNow] = useState(new Date());
@@ -98,17 +96,14 @@ export default function Home() {
   const [notesOpen, setNotesOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [openFolderId, setOpenFolderId] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const wheelLockRef = useRef(0);
 
   const greeting = config.greeting?.trim() || greetingForHour(now.getHours());
   const date = useMemo(
     () => new Intl.DateTimeFormat("tr-TR", { weekday: "long", day: "numeric", month: "long" }).format(now),
     [now],
-  );
-
-  const quickLinks = useMemo(
-    () => config.folders.flatMap((folder) => folder.links).slice(0, 8),
-    [config.folders],
   );
 
   const slides = useMemo<FolderSlide[]>(
@@ -145,29 +140,28 @@ export default function Home() {
         .slice(0, 8)
     : [];
 
-  const currentSlide = slides[activeIndex % slides.length];
-  const leftIndex = (activeIndex - 1 + slides.length) % slides.length;
-  const rightIndex = (activeIndex + 1) % slides.length;
+  const normalizedIndex = activeIndex % slides.length;
+  const currentSlide = slides[normalizedIndex];
+  const leftIndex = (normalizedIndex - 1 + slides.length) % slides.length;
+  const rightIndex = (normalizedIndex + 1) % slides.length;
+  const folderIsOpen = openFolderId === currentSlide.id;
 
   function launchAndFocus() {
     setLaunched(true);
+    setWorkspaceOpen(true);
     window.setTimeout(() => searchRef.current?.focus(), 650);
   }
 
-  function toggleWorkspace() {
-    const next = !workspaceOpen;
-    setWorkspaceOpen(next);
-    setShortcutsOpen(next);
-  }
-
   function paginate(nextDirection: number) {
+    setOpenFolderId(null);
     setDirection(nextDirection);
     setActiveIndex((previous) => (previous + nextDirection + slides.length) % slides.length);
   }
 
   function selectSlide(index: number) {
-    if (index === activeIndex) return;
-    setDirection(index > activeIndex ? 1 : -1);
+    if (index === normalizedIndex) return;
+    setOpenFolderId(null);
+    setDirection(index > normalizedIndex ? 1 : -1);
     setActiveIndex(index);
   }
 
@@ -190,6 +184,19 @@ export default function Home() {
     window.location.href = /^https?:\/\//i.test(value)
       ? value
       : `https://www.google.com/search?q=${encodeURIComponent(value)}`;
+  }
+
+  function handleWheel(event: React.WheelEvent<HTMLElement>) {
+    if (!workspaceOpen || folderIsOpen) return;
+    const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+    if (Math.abs(delta) < 20) return;
+
+    const timestamp = Date.now();
+    if (timestamp - wheelLockRef.current < 520) return;
+
+    event.preventDefault();
+    wheelLockRef.current = timestamp;
+    paginate(delta > 0 ? 1 : -1);
   }
 
   useEffect(() => {
@@ -230,6 +237,10 @@ export default function Home() {
       if (event.key === "ArrowLeft" && workspaceOpen && !isTyping) paginate(-1);
       if (event.key === "ArrowRight" && workspaceOpen && !isTyping) paginate(1);
       if (event.key === "Escape") {
+        if (openFolderId) {
+          setOpenFolderId(null);
+          return;
+        }
         setQuery("");
         setNotesOpen(false);
         searchRef.current?.blur();
@@ -241,7 +252,7 @@ export default function Home() {
       window.clearInterval(timer);
       window.removeEventListener("keydown", onKey);
     };
-  }, [workspaceOpen, slides.length]);
+  }, [workspaceOpen, slides.length, openFolderId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -401,14 +412,12 @@ export default function Home() {
 
       <section className="centerLogoDock">
         <button type="button" className="centerLogoButton" onClick={launchAndFocus} aria-label="Startpage'i aç">
-          <span className="logoPulse" />
           {logoMissing ? (
             <span className="centerLogoFallback">OY<span>.</span></span>
           ) : (
             <img src="/logo.png" alt="Ömer Yiğitler" onError={() => setLogoMissing(true)} />
           )}
         </button>
-        <p className="centerLogoHint">Başlamak için dokun</p>
       </section>
 
       <section className="searchExpansion">
@@ -442,76 +451,76 @@ export default function Home() {
         )}
       </section>
 
-      <button
-        type="button"
-        className={`breathingArrow ${workspaceOpen ? "is-open" : ""}`}
-        onClick={toggleWorkspace}
-        aria-expanded={workspaceOpen}
-        aria-label={workspaceOpen ? "Klasörleri kapat" : "Kısayolları ve klasörleri aç"}
-      >
-        <span>{workspaceOpen ? "KAPAT" : "KEŞFET"}</span>
-        <ChevronDown size={25} />
-      </button>
-
-      <nav className={`quickReveal ${shortcutsOpen ? "is-open" : ""}`} aria-label="Hızlı kısayollar">
-        {quickLinks.map((link, index) => (
-          <a
-            href={link.url}
-            target="_blank"
-            rel="noreferrer"
-            key={`${link.name}-${index}`}
-            style={{ "--shortcut-index": index } as React.CSSProperties}
-          >
-            <img src={faviconUrl(link.url)} alt="" />
-            <span>{link.name}</span>
-          </a>
-        ))}
-      </nav>
-
-      <section className="folderWorkspace" aria-hidden={!workspaceOpen}>
-        <div className="folderFrame">
+      <section className="folderWorkspace" aria-hidden={!workspaceOpen} onWheel={handleWheel}>
+        <div className={`folderFrame ${folderIsOpen ? "folder-is-open" : ""}`}>
           <button type="button" className="sideFolder sideFolderLeft" onClick={() => paginate(-1)}>
-            <Folder size={29} />
-            <span>{slides[leftIndex].title}</span>
+            <span className="folderTab" />
+            <Folder size={36} />
+            <strong>{slides[leftIndex].title}</strong>
             <small>Önceki</small>
           </button>
 
           <div className="activeFolderStage">
             <AnimatePresence initial={false} custom={direction} mode="wait">
-              <motion.article
-                key={currentSlide.id}
-                className="activeFolderCard"
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ type: "tween", duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.16}
-                onDragEnd={(_, info) => {
-                  if (info.offset.x < -60) paginate(1);
-                  if (info.offset.x > 60) paginate(-1);
-                }}
-              >
-                <header className="activeFolderHeader">
-                  <div className="activeFolderMark"><FolderOpen size={28} /></div>
-                  <div>
-                    <small>KLASÖR {String(activeIndex + 1).padStart(2, "0")}</small>
-                    <h1>{currentSlide.title}</h1>
-                    <p>{currentSlide.subtitle}</p>
-                  </div>
-                  <span className="folderCount">{activeIndex + 1} / {slides.length}</span>
-                </header>
-                <div className="activeFolderContent">{renderSlideContent(currentSlide)}</div>
-              </motion.article>
+              {folderIsOpen ? (
+                <motion.article
+                  key={`${currentSlide.id}-content`}
+                  className="activeFolderCard folderContentView"
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ type: "tween", duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  <header className="activeFolderHeader">
+                    <div className="activeFolderMark"><FolderOpen size={28} /></div>
+                    <div>
+                      <small>KLASÖR {String(normalizedIndex + 1).padStart(2, "0")}</small>
+                      <h1>{currentSlide.title}</h1>
+                      <p>{currentSlide.subtitle}</p>
+                    </div>
+                    <button type="button" className="closeFolderButton" onClick={() => setOpenFolderId(null)} aria-label="Klasörü kapat">
+                      <X size={20} />
+                    </button>
+                  </header>
+                  <div className="activeFolderContent">{renderSlideContent(currentSlide)}</div>
+                </motion.article>
+              ) : (
+                <motion.button
+                  type="button"
+                  key={`${currentSlide.id}-cover`}
+                  className="centerFolderCover"
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ type: "tween", duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.16}
+                  onDragEnd={(_, info) => {
+                    if (info.offset.x < -60) paginate(1);
+                    if (info.offset.x > 60) paginate(-1);
+                  }}
+                  onClick={() => setOpenFolderId(currentSlide.id)}
+                >
+                  <span className="folderTab" />
+                  <span className="centerFolderIcon"><FolderOpen size={76} /></span>
+                  <small>KLASÖR {String(normalizedIndex + 1).padStart(2, "0")}</small>
+                  <h1>{currentSlide.title}</h1>
+                  <p>{currentSlide.subtitle}</p>
+                  <span className="folderOpenHint">Aç</span>
+                </motion.button>
+              )}
             </AnimatePresence>
           </div>
 
           <button type="button" className="sideFolder sideFolderRight" onClick={() => paginate(1)}>
-            <Folder size={29} />
-            <span>{slides[rightIndex].title}</span>
+            <span className="folderTab" />
+            <Folder size={36} />
+            <strong>{slides[rightIndex].title}</strong>
             <small>Sonraki</small>
           </button>
 
@@ -524,7 +533,7 @@ export default function Home() {
                 <button
                   type="button"
                   key={slide.id}
-                  className={index === activeIndex ? "active" : ""}
+                  className={index === normalizedIndex ? "active" : ""}
                   onClick={() => selectSlide(index)}
                   aria-label={`${slide.title} klasörüne git`}
                 />
