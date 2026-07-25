@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, CalendarDays, CheckCircle2, Clock3, CloudSun, Command, Folder, Github, Mail, MapPin, NotebookPen, Plus, Search, Settings2, Sparkles, TrendingUp, X } from "lucide-react";
 import { defaultConfig, StartpageConfig } from "./startpage-config";
 import NotesModal from "./NotesModal";
+import BrandLogo from "./BrandLogo";
 
 const STORAGE_KEY = "startpage-config-v1";
 type WeatherData = { temp: number; feels: number; text: string; high: number; low: number; rain: number; wind: number };
@@ -171,7 +172,7 @@ export default function Home() {
   return <main className="osPage approvedHome">
     <div className="osGlow osGlowOne" /><div className="osGlow osGlowTwo" /><div className="noise" />
     <header className="osTopbar approvedTopbar">
-      <a className="osBrand" href="https://omeryigitler.com">OY<span>.</span></a>
+      <BrandLogo />
       <div className="osClock"><Clock3 size={15}/><strong>{now.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}</strong><CalendarDays size={14}/><span>{date}</span><MapPin size={14}/><span>Malta</span></div>
       <div className="topbarActions"><button type="button" className="osManage notesTopButton" onClick={openNotes}><NotebookPen size={16}/> Notlar</button><Link className="osManage" href="/yonetim"><Settings2 size={16}/> Yönetim</Link></div>
     </header>
