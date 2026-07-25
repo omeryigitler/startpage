@@ -1,0 +1,137 @@
+/* Guaranteed three-card Taurus carousel geometry. Imported last. */
+
+.taurusStartpage .folderWorkspace{
+  overflow:visible!important;
+}
+
+.taurusStartpage .folderFrame{
+  position:relative!important;
+  display:block!important;
+  width:min(1080px,calc(100vw - 48px))!important;
+  height:380px!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0 auto!important;
+  padding:0 0 28px!important;
+  overflow:visible!important;
+}
+
+.taurusStartpage .activeFolderStage{
+  position:absolute!important;
+  z-index:6!important;
+  top:12px!important;
+  left:50%!important;
+  width:520px!important;
+  max-width:calc(100% - 420px)!important;
+  height:320px!important;
+  min-height:320px!important;
+  transform:translateX(-50%)!important;
+  overflow:visible!important;
+}
+
+.taurusStartpage .centerFolderCover,
+.taurusStartpage .activeFolderCard{
+  width:100%!important;
+  height:100%!important;
+}
+
+.taurusStartpage .sideFolder{
+  position:absolute!important;
+  z-index:2!important;
+  top:50%!important;
+  width:330px!important;
+  height:270px!important;
+  min-height:0!important;
+  margin:0!important;
+  opacity:.52!important;
+  filter:saturate(.72)!important;
+}
+
+.taurusStartpage .sideFolderLeft{
+  left:0!important;
+  right:auto!important;
+  transform:translateY(-50%) scale(.78)!important;
+  transform-origin:left center!important;
+}
+
+.taurusStartpage .sideFolderRight{
+  right:0!important;
+  left:auto!important;
+  transform:translateY(-50%) scale(.78)!important;
+  transform-origin:right center!important;
+}
+
+.taurusStartpage .sideFolderLeft:hover{
+  transform:translateY(-50%) scale(.82)!important;
+}
+
+.taurusStartpage .sideFolderRight:hover{
+  transform:translateY(-50%) scale(.82)!important;
+}
+
+.taurusStartpage .folderSliderFooter{
+  left:50%!important;
+  right:auto!important;
+  bottom:0!important;
+  transform:translateX(-50%)!important;
+}
+
+@media(max-width:900px){
+  .taurusStartpage .folderFrame{
+    width:calc(100vw - 24px)!important;
+  }
+
+  .taurusStartpage .activeFolderStage{
+    width:min(500px,calc(100% - 170px))!important;
+    max-width:none!important;
+  }
+
+  .taurusStartpage .sideFolder{
+    width:210px!important;
+    height:250px!important;
+  }
+
+  .taurusStartpage .sideFolderLeft{
+    left:-38px!important;
+    transform:translateY(-50%) scale(.74)!important;
+  }
+
+  .taurusStartpage .sideFolderRight{
+    right:-38px!important;
+    transform:translateY(-50%) scale(.74)!important;
+  }
+}
+
+@media(max-width:620px){
+  .taurusStartpage .folderFrame{
+    width:calc(100vw - 10px)!important;
+    height:350px!important;
+  }
+
+  .taurusStartpage .activeFolderStage{
+    top:8px!important;
+    width:calc(100% - 74px)!important;
+    height:310px!important;
+    min-height:310px!important;
+  }
+
+  .taurusStartpage .sideFolder{
+    width:92px!important;
+    height:220px!important;
+    padding:8px 4px!important;
+  }
+
+  .taurusStartpage .sideFolderLeft{
+    left:-19px!important;
+    transform:translateY(-50%) scale(.72)!important;
+  }
+
+  .taurusStartpage .sideFolderRight{
+    right:-19px!important;
+    transform:translateY(-50%) scale(.72)!important;
+  }
+
+  .taurusStartpage .sideFolder strong{
+    display:none!important;
+  }
+}
