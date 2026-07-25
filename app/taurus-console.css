@@ -1,0 +1,268 @@
+/* Final Taurus command-deck layer. Imported after all legacy slider styles. */
+
+.taurusStartpage .taurusSystemBar{display:none!important}
+
+.taurusMarketTicker{
+  position:fixed;
+  z-index:80;
+  top:0;
+  left:0;
+  right:0;
+  height:32px;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  overflow:hidden;
+  color:#070705;
+  background:#FFD700;
+  border-bottom:1px solid rgba(0,0,0,.4);
+  box-shadow:0 8px 30px rgba(255,215,0,.08);
+  font:800 9px/1 var(--taurus-mono,"JetBrains Mono",monospace);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  transform:translateY(-105%);
+  opacity:0;
+  transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .3s ease;
+}
+
+.taurusMarketTicker.is-visible{transform:translateY(0);opacity:1}
+.taurusTickerLabel,.taurusTickerDelay{position:relative;z-index:2;height:100%;display:flex;align-items:center;padding:0 18px;white-space:nowrap;background:#FFD700}
+.taurusTickerLabel{border-right:1px solid rgba(0,0,0,.22)}
+.taurusTickerDelay{border-left:1px solid rgba(0,0,0,.22);font-size:8px;opacity:.68}
+.taurusTickerViewport{min-width:0;overflow:hidden}
+.taurusTickerTrack{width:max-content;display:flex;align-items:center;animation:taurusTickerMove 30s linear infinite;will-change:transform}
+.taurusTickerItem{height:32px;display:flex;align-items:center;gap:9px;padding:0 24px;border-right:1px solid rgba(0,0,0,.14);white-space:nowrap}
+.taurusTickerItem strong{font-size:10px}
+.taurusTickerItem span{font-size:10px;font-weight:900}
+.taurusTickerItem em{font-style:normal;font-size:9px}
+.taurusTickerItem em.up{color:#075d2e}.taurusTickerItem em.down{color:#9f1d1d}
+.taurusTickerItem small{font-size:7px;opacity:.52}
+.taurusTickerEmpty{height:32px;display:flex;align-items:center;justify-content:center;opacity:.55}
+@keyframes taurusTickerMove{to{transform:translateX(-50%)}}
+
+/* Circular waveform around the Taurus mark. */
+.taurusStartpage .logoScanLine{display:none!important}
+.taurusStartpage .centerLogoButton{overflow:visible!important;isolation:isolate}
+.taurusStartpage .centerLogoButton:before,
+.taurusStartpage .centerLogoButton:after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  pointer-events:none;
+  border:1px solid rgba(255,215,0,.72);
+  border-radius:48% 52% 46% 54% / 52% 45% 55% 48%;
+  box-shadow:0 0 10px rgba(255,215,0,.22),inset 0 0 8px rgba(255,215,0,.08);
+  animation:taurusCircularWave 2.8s ease-in-out infinite;
+}
+.taurusStartpage .centerLogoButton:before{inset:-10px}
+.taurusStartpage .centerLogoButton:after{inset:-22px;opacity:.38;animation-delay:-1.4s;animation-direction:reverse}
+@keyframes taurusCircularWave{
+  0%,100%{transform:rotate(0deg) scale(.97);border-radius:48% 52% 46% 54% / 52% 45% 55% 48%;opacity:.45}
+  35%{transform:rotate(7deg) scale(1.04);border-radius:53% 47% 55% 45% / 46% 56% 44% 54%;opacity:1}
+  70%{transform:rotate(-6deg) scale(1);border-radius:45% 55% 48% 52% / 55% 47% 53% 45%;opacity:.62}
+}
+
+/* Retire the folder metaphor entirely. */
+.taurusStartpage .folderTab,
+.taurusStartpage .folderScanLine{display:none!important}
+
+.taurusStartpage .folderWorkspace{inset:182px 20px 22px!important}
+.taurusStartpage .folderFrame{
+  width:min(1280px,100%)!important;
+  max-height:560px!important;
+  min-height:400px!important;
+  padding:0 0 34px!important;
+  display:grid!important;
+  grid-template-columns:260px minmax(560px,760px) 260px!important;
+  place-content:center!important;
+  align-items:center!important;
+  gap:0!important;
+  overflow:visible!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+.taurusStartpage .activeFolderStage{z-index:5;overflow:visible!important;height:100%;min-height:400px}
+
+.taurusStartpage .centerFolderCover,
+.taurusStartpage .activeFolderCard,
+.taurusStartpage .sideFolder{
+  clip-path:polygon(20px 0,100% 0,100% calc(100% - 20px),calc(100% - 20px) 100%,0 100%,0 20px);
+  border-radius:0!important;
+  background:
+    linear-gradient(90deg,rgba(255,215,0,.028) 1px,transparent 1px),
+    linear-gradient(rgba(255,215,0,.022) 1px,transparent 1px),
+    radial-gradient(circle at 50% 0%,rgba(255,215,0,.07),transparent 35%),
+    rgba(8,8,7,.96)!important;
+  background-size:34px 34px,34px 34px,auto,auto!important;
+}
+
+.taurusStartpage .centerFolderCover,
+.taurusStartpage .activeFolderCard{
+  border:1px solid rgba(255,215,0,.38)!important;
+  box-shadow:0 38px 95px rgba(0,0,0,.58),0 0 45px rgba(255,215,0,.04),inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+
+.taurusStartpage .centerFolderCover{
+  padding:48px 64px 44px!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+}
+
+.taurusStartpage .centerFolderCover:before,
+.taurusStartpage .activeFolderCard:before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:62px;
+  bottom:62px;
+  width:2px;
+  background:#FFD700;
+  box-shadow:0 0 14px rgba(255,215,0,.65);
+}
+
+.taurusStartpage .centerFolderCover:after{
+  content:"TAURUS COMMAND DECK";
+  position:absolute;
+  right:25px;
+  bottom:20px;
+  color:rgba(255,215,0,.34);
+  font:700 7px/1 var(--taurus-mono,"JetBrains Mono",monospace);
+  letter-spacing:.22em;
+}
+
+.taurusStartpage .folderModuleStatus{
+  top:22px!important;
+  left:26px!important;
+  color:#8e8e85!important;
+}
+
+.taurusStartpage .centerFolderIcon{
+  width:96px!important;
+  height:96px!important;
+  margin-bottom:25px!important;
+  border:1px solid rgba(255,215,0,.45)!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle,#15130a,#080704 70%)!important;
+  box-shadow:0 0 0 8px rgba(255,215,0,.025),0 0 35px rgba(255,215,0,.12)!important;
+}
+
+.taurusStartpage .centerFolderCover>small{font:800 8px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;letter-spacing:.26em!important;color:#818179!important}
+.taurusStartpage .centerFolderCover h1{margin:16px 0 8px!important;font-size:clamp(32px,3.2vw,51px)!important;letter-spacing:-.045em!important}
+.taurusStartpage .centerFolderCover p{font-size:12px!important;color:#8c8c83!important}
+.taurusStartpage .folderEnter{margin-top:27px!important;border-radius:4px!important;padding:10px 15px!important;background:rgba(255,215,0,.06)!important}
+
+.taurusStartpage .sideFolder{
+  z-index:1!important;
+  width:100%!important;
+  height:72%!important;
+  min-height:310px!important;
+  padding:34px 28px!important;
+  border:1px solid rgba(255,215,0,.16)!important;
+  opacity:.34!important;
+  filter:blur(.25px) saturate(.65)!important;
+  box-shadow:0 28px 70px rgba(0,0,0,.42)!important;
+  overflow:hidden!important;
+}
+
+.taurusStartpage .sideFolder:before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:44px;
+  bottom:44px;
+  width:2px;
+  background:rgba(255,215,0,.55);
+}
+
+.taurusStartpage .sideFolder:after{
+  content:"STANDBY";
+  position:absolute;
+  right:16px;
+  bottom:14px;
+  color:rgba(255,215,0,.3);
+  font:700 7px/1 var(--taurus-mono,"JetBrains Mono",monospace);
+  letter-spacing:.18em;
+}
+
+.taurusStartpage .sideFolderLeft{transform:translateX(72px) scale(.74)!important;transform-origin:right center!important}
+.taurusStartpage .sideFolderRight{transform:translateX(-72px) scale(.74)!important;transform-origin:left center!important}
+.taurusStartpage .sideFolder:hover{z-index:3!important;opacity:.62!important;filter:none!important;border-color:rgba(255,215,0,.34)!important}
+.taurusStartpage .sideFolderLeft:hover{transform:translateX(62px) scale(.77)!important}
+.taurusStartpage .sideFolderRight:hover{transform:translateX(-62px) scale(.77)!important}
+
+.taurusStartpage .sideFolderIcon{
+  width:74px!important;
+  height:74px!important;
+  border-radius:50%!important;
+  color:#FFD700!important;
+  background:#080704!important;
+}
+.taurusStartpage .sideFolder strong{font-size:21px!important}
+.taurusStartpage .sideFolder small{display:block!important;max-width:180px!important;font:600 10px/1.5 var(--taurus-body,"Manrope",sans-serif)!important;letter-spacing:0!important;text-transform:none!important;text-align:center!important}
+
+.taurusStartpage .folder-is-open .sideFolder{opacity:.12!important;pointer-events:none}
+
+/* True optical centering for pagination. */
+.taurusStartpage .folderSliderFooter{
+  position:absolute!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:0!important;
+  width:max-content!important;
+  transform:translateX(-50%)!important;
+  display:block!important;
+}
+.taurusStartpage .folderDots{display:flex!important;align-items:center!important;justify-content:center!important;gap:10px!important;padding:7px 12px!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:999px!important;background:rgba(5,5,5,.82)!important;box-shadow:0 10px 30px rgba(0,0,0,.35)!important}
+.taurusStartpage .folderDots button{width:5px!important;height:5px!important;border-radius:50%!important;background:rgba(255,255,255,.28)!important;transform:none!important}
+.taurusStartpage .folderDots button.active{width:20px!important;border-radius:999px!important;background:#FFD700!important;box-shadow:0 0 10px rgba(255,215,0,.55)!important}
+
+/* Open command module uses the same agent-card language. */
+.taurusStartpage .activeFolderCard{overflow:hidden!important}
+.taurusStartpage .activeFolderHeader{border-bottom:1px solid rgba(255,255,255,.08)!important;background:rgba(255,255,255,.018)!important}
+.taurusStartpage .activeFolderMark{border-radius:50%!important;border-color:rgba(255,215,0,.35)!important;background:#090805!important;color:#FFD700!important}
+.taurusStartpage .closeFolderButton{border-radius:50%!important}
+.taurusStartpage .folderLinkGrid a,
+.taurusStartpage .projectFolderGrid a,
+.taurusStartpage .systemFolderGrid a,
+.taurusStartpage .systemFolderGrid button,
+.taurusStartpage .dailyPanel{
+  border-radius:14px!important;
+  border-color:rgba(255,255,255,.09)!important;
+  background:rgba(255,255,255,.032)!important;
+}
+.taurusStartpage .folderLinkGrid a:hover,
+.taurusStartpage .projectFolderGrid a:hover,
+.taurusStartpage .systemFolderGrid a:hover,
+.taurusStartpage .systemFolderGrid button:hover{border-color:rgba(255,215,0,.34)!important;background:rgba(255,215,0,.055)!important}
+
+@media(max-width:980px){
+  .taurusMarketTicker{grid-template-columns:auto minmax(0,1fr)}
+  .taurusTickerDelay{display:none}
+  .taurusStartpage .folderFrame{grid-template-columns:88px minmax(0,1fr) 88px!important}
+  .taurusStartpage .sideFolder{min-height:280px!important;padding:22px 10px!important}
+  .taurusStartpage .sideFolder strong{font-size:12px!important;writing-mode:vertical-rl;transform:rotate(180deg)}
+  .taurusStartpage .sideFolder small,.taurusStartpage .folderModuleCode,.taurusStartpage .sideFolderIcon{display:none!important}
+  .taurusStartpage .sideFolderLeft{transform:translateX(24px) scale(.78)!important}
+  .taurusStartpage .sideFolderRight{transform:translateX(-24px) scale(.78)!important}
+  .taurusStartpage .centerFolderCover{padding:42px 30px!important}
+}
+
+@media(max-width:620px){
+  .taurusTickerLabel{padding:0 10px;font-size:7px}
+  .taurusTickerItem{padding:0 14px}
+  .taurusStartpage .folderWorkspace{inset:188px 8px 12px!important}
+  .taurusStartpage .folderFrame{grid-template-columns:40px minmax(0,1fr) 40px!important;min-height:360px!important;padding-bottom:32px!important}
+  .taurusStartpage .activeFolderStage{min-height:360px!important}
+  .taurusStartpage .sideFolder{min-height:230px!important;padding:10px 4px!important}
+  .taurusStartpage .sideFolder strong{font-size:8px!important}
+  .taurusStartpage .centerFolderCover{padding:40px 18px 32px!important}
+  .taurusStartpage .centerFolderIcon{width:72px!important;height:72px!important}
+  .taurusStartpage .centerFolderCover h1{font-size:28px!important}
+  .taurusStartpage .folderModuleStatus{left:17px!important;top:16px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .taurusTickerTrack,.taurusStartpage .centerLogoButton:before,.taurusStartpage .centerLogoButton:after{animation:none!important}
+}
