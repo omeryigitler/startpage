@@ -12,6 +12,7 @@ import "./taurus-startpage.css";
 import "./taurus-console.css";
 import "./taurus-carousel-fix.css";
 import "./taurus-ticker-loop.css";
+import "./taurus-final-polish.css";
 import TaurusTicker from "./TaurusTicker";
 
 export const metadata: Metadata = {
