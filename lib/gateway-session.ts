@@ -1,10 +1,14 @@
 const encoder = new TextEncoder();
 
 export const GATEWAY_SESSION_COOKIE = "startpage_gateway";
-export const GATEWAY_SESSION_MAX_AGE = 7 * 24 * 60 * 60;
 
-type GatewayPayload = {
+export type GatewayProvider = "passkey" | "telegram";
+export type GatewayScope = "full" | "workspace";
+
+export type GatewaySession = {
   uid: string;
+  provider: GatewayProvider;
+  scope: GatewayScope;
   exp: number;
   nonce: string;
 };
@@ -54,29 +58,43 @@ function timingSafeEqual(left: string, right: string) {
   return difference === 0;
 }
 
-export async function createGatewaySession(uid: string) {
-  const payload: GatewayPayload = {
-    uid,
-    exp: Date.now() + GATEWAY_SESSION_MAX_AGE * 1000,
+export async function createGatewaySession(input: {
+  uid: string;
+  provider: GatewayProvider;
+  scope: GatewayScope;
+  maxAge: number;
+}) {
+  const maxAge = Math.max(60, Math.min(input.maxAge, input.provider === "passkey" ? 12 * 60 * 60 : 60 * 60));
+  const payload: GatewaySession = {
+    uid: input.uid,
+    provider: input.provider,
+    scope: input.scope,
+    exp: Date.now() + maxAge * 1000,
     nonce: randomNonce(),
   };
   const encodedPayload = encodeBase64Url(JSON.stringify(payload));
   const signature = await sign(encodedPayload);
-  return `${encodedPayload}.${signature}`;
+  return { token: `${encodedPayload}.${signature}`, maxAge };
 }
 
-export async function verifyGatewaySession(token?: string | null) {
-  if (!token) return false;
+export async function verifyGatewaySession(token?: string | null): Promise<GatewaySession | null> {
+  if (!token) return null;
   const [encodedPayload, suppliedSignature] = token.split(".");
-  if (!encodedPayload || !suppliedSignature) return false;
+  if (!encodedPayload || !suppliedSignature) return null;
 
   try {
     const expectedSignature = await sign(encodedPayload);
-    if (!timingSafeEqual(suppliedSignature, expectedSignature)) return false;
+    if (!timingSafeEqual(suppliedSignature, expectedSignature)) return null;
 
-    const payload = JSON.parse(decodeBase64Url(encodedPayload)) as GatewayPayload;
-    return Boolean(payload.uid && Number.isFinite(payload.exp) && payload.exp > Date.now());
+    const payload = JSON.parse(decodeBase64Url(encodedPayload)) as GatewaySession;
+    const valid =
+      Boolean(payload.uid) &&
+      ["passkey", "telegram"].includes(payload.provider) &&
+      ["full", "workspace"].includes(payload.scope) &&
+      Number.isFinite(payload.exp) &&
+      payload.exp > Date.now();
+    return valid ? payload : null;
   } catch {
-    return false;
+    return null;
   }
 }
