@@ -1,0 +1,22 @@
+/* Seamless market marquee: each group is wider than the viewport and repeated twice. */
+.taurusTickerViewport{overflow:hidden!important}
+.taurusTickerTrack{
+  display:flex!important;
+  width:max-content!important;
+  min-width:max-content!important;
+  animation:taurusTickerLoop 48s linear infinite!important;
+  will-change:transform;
+}
+.taurusTickerGroup{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  min-width:max-content;
+}
+@keyframes taurusTickerLoop{
+  from{transform:translate3d(0,0,0)}
+  to{transform:translate3d(-50%,0,0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .taurusTickerTrack{animation:none!important}
+}
