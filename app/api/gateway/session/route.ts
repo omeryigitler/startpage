@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const redeemResponse = await fetch(`${GATEWAY_ORIGIN}/api/gateway-handoff?action=redeem`, {
+    const redeemResponse = await fetch(`${GATEWAY_ORIGIN}/api/csp-report?action=handoff_redeem`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
