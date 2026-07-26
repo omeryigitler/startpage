@@ -1,14 +1,17 @@
 const encoder = new TextEncoder();
 
-export const GATEWAY_SESSION_COOKIE = "startpage_gateway";
+export const GATEWAY_SESSION_COOKIE = "__Host-startpage_gateway";
+const GATEWAY_SESSION_VERSION = 1;
 
 export type GatewayProvider = "passkey" | "telegram";
 export type GatewayScope = "full" | "workspace";
 
 export type GatewaySession = {
+  ver: number;
   uid: string;
   provider: GatewayProvider;
   scope: GatewayScope;
+  iat: number;
   exp: number;
   nonce: string;
 };
@@ -29,18 +32,23 @@ function decodeBase64Url(value: string) {
 }
 
 function randomNonce() {
-  const bytes = new Uint8Array(18);
+  const bytes = new Uint8Array(24);
   crypto.getRandomValues(bytes);
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-async function sign(value: string) {
-  const secret = process.env.NEXTAUTH_SECRET;
-  if (!secret) throw new Error("NEXTAUTH_SECRET is required for gateway sessions");
+function sessionSecret() {
+  const secret = process.env.GATEWAY_SESSION_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("GATEWAY_SESSION_SECRET or NEXTAUTH_SECRET must contain at least 32 characters");
+  }
+  return secret;
+}
 
+async function sign(value: string) {
   const key = await crypto.subtle.importKey(
     "raw",
-    encoder.encode(secret),
+    encoder.encode(sessionSecret()),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],
@@ -58,18 +66,36 @@ function timingSafeEqual(left: string, right: string) {
   return difference === 0;
 }
 
+function providerScopePairIsValid(provider: GatewayProvider, scope: GatewayScope) {
+  return (
+    (provider === "passkey" && scope === "full") ||
+    (provider === "telegram" && scope === "workspace")
+  );
+}
+
 export async function createGatewaySession(input: {
   uid: string;
   provider: GatewayProvider;
   scope: GatewayScope;
   maxAge: number;
 }) {
-  const maxAge = Math.max(60, Math.min(input.maxAge, input.provider === "passkey" ? 12 * 60 * 60 : 60 * 60));
+  if (!/^(?:passkey_admin_primary|telegram_admin_[A-Za-z0-9_-]{1,128})$/.test(input.uid)) {
+    throw new Error("Invalid gateway session identity");
+  }
+  if (!providerScopePairIsValid(input.provider, input.scope)) {
+    throw new Error("Invalid gateway provider/scope combination");
+  }
+
+  const providerLimit = input.provider === "passkey" ? 12 * 60 * 60 : 60 * 60;
+  const maxAge = Math.max(60, Math.min(Number(input.maxAge) || 0, providerLimit));
+  const now = Date.now();
   const payload: GatewaySession = {
+    ver: GATEWAY_SESSION_VERSION,
     uid: input.uid,
     provider: input.provider,
     scope: input.scope,
-    exp: Date.now() + maxAge * 1000,
+    iat: now,
+    exp: now + maxAge * 1000,
     nonce: randomNonce(),
   };
   const encodedPayload = encodeBase64Url(JSON.stringify(payload));
@@ -78,8 +104,10 @@ export async function createGatewaySession(input: {
 }
 
 export async function verifyGatewaySession(token?: string | null): Promise<GatewaySession | null> {
-  if (!token) return null;
-  const [encodedPayload, suppliedSignature] = token.split(".");
+  if (!token || token.length > 4096) return null;
+  const parts = token.split(".");
+  if (parts.length !== 2) return null;
+  const [encodedPayload, suppliedSignature] = parts;
   if (!encodedPayload || !suppliedSignature) return null;
 
   try {
@@ -87,12 +115,20 @@ export async function verifyGatewaySession(token?: string | null): Promise<Gatew
     if (!timingSafeEqual(suppliedSignature, expectedSignature)) return null;
 
     const payload = JSON.parse(decodeBase64Url(encodedPayload)) as GatewaySession;
+    const now = Date.now();
+    const maxLifetime = payload.provider === "passkey" ? 12 * 60 * 60 * 1000 : 60 * 60 * 1000;
     const valid =
-      Boolean(payload.uid) &&
+      payload.ver === GATEWAY_SESSION_VERSION &&
+      /^(?:passkey_admin_primary|telegram_admin_[A-Za-z0-9_-]{1,128})$/.test(payload.uid) &&
       ["passkey", "telegram"].includes(payload.provider) &&
       ["full", "workspace"].includes(payload.scope) &&
+      providerScopePairIsValid(payload.provider, payload.scope) &&
+      Number.isFinite(payload.iat) &&
       Number.isFinite(payload.exp) &&
-      payload.exp > Date.now();
+      payload.iat <= now + 30_000 &&
+      payload.exp > now &&
+      payload.exp - payload.iat <= maxLifetime &&
+      /^[a-f0-9]{48}$/.test(payload.nonce);
     return valid ? payload : null;
   } catch {
     return null;
