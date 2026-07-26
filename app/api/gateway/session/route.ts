@@ -1,4 +1,4 @@
-import { createPublicKey, verify as verifySignature } from "node:crypto";
+import { verify as verifySignature } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import {
   createGatewaySession,
@@ -11,8 +11,8 @@ export const dynamic = "force-dynamic";
 
 const FIREBASE_PROJECT_ID = "omeryigitler-5abfb";
 const FIREBASE_ISSUER = `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`;
-const FIREBASE_JWKS_URL =
-  "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
+const FIREBASE_CERTS_URL =
+  "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com";
 const STARTPAGE_ORIGIN = "https://start.omeryigitler.com";
 const GATEWAY_URL = "https://omeryigitler.com/start-gateway.html";
 const MAX_AUTH_AGE_SECONDS = 10 * 60;
@@ -34,9 +34,7 @@ type FirebaseClaims = {
   role?: string;
 };
 
-type FirebaseJwk = JsonWebKey & { kid?: string };
-
-let cachedKeys: { expiresAt: number; keys: Map<string, FirebaseJwk> } | null = null;
+let cachedCertificates: { expiresAt: number; values: Map<string, string> } | null = null;
 
 function safeReturnTarget(value: string | null) {
   try {
@@ -61,24 +59,41 @@ function cacheLifetime(response: Response) {
   return Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : 3600_000;
 }
 
-async function getFirebaseKeys() {
-  if (cachedKeys && cachedKeys.expiresAt > Date.now()) return cachedKeys.keys;
-
-  const response = await fetch(FIREBASE_JWKS_URL, { cache: "no-store" });
-  if (!response.ok) throw new Error(`Firebase signing keys unavailable (${response.status})`);
-
-  const data = (await response.json()) as { keys?: FirebaseJwk[] };
-  const keys = new Map<string, FirebaseJwk>();
-  for (const key of data.keys || []) {
-    if (key.kid) keys.set(key.kid, key);
+async function getFirebaseCertificates() {
+  if (cachedCertificates && cachedCertificates.expiresAt > Date.now()) {
+    return cachedCertificates.values;
   }
-  if (!keys.size) throw new Error("Firebase signing keys response was empty");
 
-  cachedKeys = {
-    keys,
+  const response = await fetch(FIREBASE_CERTS_URL, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Firebase certificates unavailable (${response.status})`);
+
+  const data = (await response.json()) as Record<string, string>;
+  const values = new Map<string, string>();
+  for (const [kid, certificate] of Object.entries(data)) {
+    if (kid && typeof certificate === "string" && certificate.includes("BEGIN CERTIFICATE")) {
+      values.set(kid, certificate);
+    }
+  }
+  if (!values.size) throw new Error("Firebase certificate response was empty");
+
+  cachedCertificates = {
+    values,
     expiresAt: Date.now() + cacheLifetime(response),
   };
-  return keys;
+  return values;
+}
+
+function verifyTokenSignature(parts: string[], certificate: string) {
+  try {
+    return verifySignature(
+      "RSA-SHA256",
+      Buffer.from(`${parts[0]}.${parts[1]}`),
+      certificate,
+      Buffer.from(parts[2], "base64url"),
+    );
+  } catch {
+    return false;
+  }
 }
 
 async function verifyFirebaseIdToken(idToken: string) {
@@ -106,31 +121,15 @@ async function verifyFirebaseIdToken(idToken: string) {
 
   if (!validClaims) return null;
 
-  const keys = await getFirebaseKeys();
-  const jwk = keys.get(header.kid);
-  if (!jwk) {
-    cachedKeys = null;
-    const refreshedKeys = await getFirebaseKeys();
-    const refreshedJwk = refreshedKeys.get(header.kid);
-    if (!refreshedJwk) return null;
-    return verifyTokenSignature(parts, refreshedJwk) ? { uid, claims } : null;
+  const certificates = await getFirebaseCertificates();
+  let certificate = certificates.get(header.kid);
+  if (!certificate) {
+    cachedCertificates = null;
+    certificate = (await getFirebaseCertificates()).get(header.kid);
   }
+  if (!certificate) return null;
 
-  return verifyTokenSignature(parts, jwk) ? { uid, claims } : null;
-}
-
-function verifyTokenSignature(parts: string[], jwk: FirebaseJwk) {
-  try {
-    const publicKey = createPublicKey({ key: jwk, format: "jwk" });
-    return verifySignature(
-      "RSA-SHA256",
-      Buffer.from(`${parts[0]}.${parts[1]}`),
-      publicKey,
-      Buffer.from(parts[2], "base64url"),
-    );
-  } catch {
-    return false;
-  }
+  return verifyTokenSignature(parts, certificate) ? { uid, claims } : null;
 }
 
 function failureResponse(reason: string) {
