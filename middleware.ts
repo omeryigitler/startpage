@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GATEWAY_SESSION_COOKIE, verifyGatewaySession } from "./lib/gateway-session";
 
-const PUBLIC_PATH_PREFIXES = [
-  "/api/auth",
-  "/api/gateway/session",
-  "/_next",
-];
-
 function isPublicPath(pathname: string) {
-  if (PUBLIC_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return true;
-  return /\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|woff2?)$/i.test(pathname);
+  const nextAsset = pathname === "/_next" || pathname.startsWith("/_next/");
+  const nextAuth = pathname === "/api/auth" || pathname.startsWith("/api/auth/");
+  const gatewaySession = pathname === "/api/gateway/session";
+  const staticAsset = /\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|map|woff2?)$/i.test(pathname);
+  return nextAsset || nextAuth || gatewaySession || staticAsset;
 }
 
 function gatewayRedirect(request: NextRequest) {
   const gateway = new URL("https://omeryigitler.com/start-gateway.html");
   gateway.searchParams.set("return", request.nextUrl.toString());
-  return NextResponse.redirect(gateway);
+  const response = NextResponse.redirect(gateway);
+  response.headers.set("Cache-Control", "no-store");
+  response.headers.set("Referrer-Policy", "no-referrer");
+  return response;
 }
 
 function forbidden() {
@@ -50,6 +50,8 @@ export async function middleware(request: NextRequest) {
   response.headers.set("X-Taurus-Provider", session.provider);
   response.headers.set("X-Taurus-Scope", session.scope);
   response.headers.set("Cache-Control", "no-store");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "no-referrer");
   return response;
 }
 
