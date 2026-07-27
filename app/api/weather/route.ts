@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   url.searchParams.set("forecast_days", "1");
   url.searchParams.set("timezone", timezone);
 
-  const response = await fetch(url, { next: { revalidate: 900 } });
+  const response = await fetch(url, { next: { revalidate: 300 } });
   if (!response.ok) return NextResponse.json({ error: "Hava durumu alınamadı" }, { status: 502 });
   const data = await response.json();
   const code = Number(data.current?.weather_code ?? -1);
@@ -38,5 +38,7 @@ export async function GET(request: NextRequest) {
     rain: Math.round(data.daily?.precipitation_probability_max?.[0] ?? 0),
     code,
     isDay: Number(data.current?.is_day ?? 1) === 1
+  }, {
+    headers: { "Cache-Control": "s-maxage=300, stale-while-revalidate=300" }
   });
 }
