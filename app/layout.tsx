@@ -16,6 +16,7 @@ import "./taurus-final-polish.css";
 import "./taurus-open-module.css";
 import "./taurus-command-bridge.css";
 import "./taurus-command-labels.css";
+import "./taurus-listening-cleanup.css";
 import TaurusTicker from "./TaurusTicker";
 import TaurusCommandBridge from "./TaurusCommandBridge";
 
