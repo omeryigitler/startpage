@@ -17,8 +17,10 @@ import "./taurus-open-module.css";
 import "./taurus-command-bridge.css";
 import "./taurus-command-labels.css";
 import "./taurus-listening-cleanup.css";
+import "./taurus-weather-command.css";
 import TaurusTicker from "./TaurusTicker";
 import TaurusCommandBridge from "./TaurusCommandBridge";
+import TaurusCommandEnhancements from "./TaurusCommandEnhancements";
 
 export const metadata: Metadata = {
   title: "Startpage — Ömer Yiğitler",
@@ -32,6 +34,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {children}
         <TaurusTicker />
         <TaurusCommandBridge />
+        <TaurusCommandEnhancements />
       </body>
     </html>
   );
