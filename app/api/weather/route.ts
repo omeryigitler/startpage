@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   const url = new URL("https://api.open-meteo.com/v1/forecast");
   url.searchParams.set("latitude", String(latitude));
   url.searchParams.set("longitude", String(longitude));
-  url.searchParams.set("current", "temperature_2m,apparent_temperature,weather_code,wind_speed_10m");
+  url.searchParams.set("current", "temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day");
   url.searchParams.set("daily", "temperature_2m_max,temperature_2m_min,precipitation_probability_max");
   url.searchParams.set("forecast_days", "1");
   url.searchParams.set("timezone", timezone);
@@ -35,6 +35,8 @@ export async function GET(request: NextRequest) {
     text: descriptions[code] || "Değişken",
     high: Math.round(data.daily?.temperature_2m_max?.[0]),
     low: Math.round(data.daily?.temperature_2m_min?.[0]),
-    rain: Math.round(data.daily?.precipitation_probability_max?.[0] ?? 0)
+    rain: Math.round(data.daily?.precipitation_probability_max?.[0] ?? 0),
+    code,
+    isDay: Number(data.current?.is_day ?? 1) === 1
   });
 }
