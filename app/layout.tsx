@@ -14,8 +14,9 @@ import "./taurus-carousel-fix.css";
 import "./taurus-ticker-loop.css";
 import "./taurus-final-polish.css";
 import "./taurus-open-module.css";
+import "./taurus-command-bridge.css";
 import TaurusTicker from "./TaurusTicker";
-import SearchNewTabGuard from "./SearchNewTabGuard";
+import TaurusCommandBridge from "./TaurusCommandBridge";
 
 export const metadata: Metadata = {
   title: "Startpage — Ömer Yiğitler",
@@ -28,7 +29,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         {children}
         <TaurusTicker />
-        <SearchNewTabGuard />
+        <TaurusCommandBridge />
       </body>
     </html>
   );
