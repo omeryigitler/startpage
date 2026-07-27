@@ -267,7 +267,6 @@ export default function TaurusCommandEnhancements() {
             <div><Droplets size={15} /><span>YAĞIŞ</span><strong>%{weather.rain}</strong></div>
             <div><Wind size={15} /><span>RÜZGÂR</span><strong>{weather.wind} km/sa</strong></div>
           </div>
-          <footer className="taurusWeatherSource">VERİ: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">OPEN-METEO</a> · EN FAZLA 5 DK ÖNBELLEK</footer>
         </div>
       )}
     </section>,
