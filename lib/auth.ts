@@ -3,9 +3,9 @@ import type { JWT } from "next-auth/jwt";
 import GoogleProvider from "next-auth/providers/google";
 
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "yigitleromer@gmail.com").toLowerCase();
-const REFRESH_SKEW_MS = 60_000;
+export const GOOGLE_REFRESH_SKEW_MS = 60_000;
 
-type TaurusJwt = JWT & {
+export type TaurusJwt = JWT & {
   googleIdToken?: string;
   googleAccessToken?: string;
   googleRefreshToken?: string;
@@ -13,7 +13,7 @@ type TaurusJwt = JWT & {
   googleAuthError?: string;
 };
 
-async function refreshGoogleIdentity(token: TaurusJwt): Promise<TaurusJwt> {
+export async function refreshGoogleIdentity(token: TaurusJwt): Promise<TaurusJwt> {
   if (!token.googleRefreshToken) {
     return { ...token, googleAuthError: "GoogleRefreshTokenMissing" };
   }
@@ -100,7 +100,7 @@ export const authOptions: NextAuthOptions = {
       if (
         taurusToken.googleIdToken
         && taurusToken.googleTokenExpiresAt
-        && Date.now() < taurusToken.googleTokenExpiresAt - REFRESH_SKEW_MS
+        && Date.now() < taurusToken.googleTokenExpiresAt - GOOGLE_REFRESH_SKEW_MS
       ) {
         return taurusToken;
       }
