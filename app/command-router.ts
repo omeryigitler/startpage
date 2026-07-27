@@ -34,6 +34,7 @@ export function normalizeCommand(value: string) {
     .toLocaleLowerCase("tr-TR")
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ı/g, "i")
     .replace(/[^a-z0-9çğıöşü.:/@?\-\s]/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
