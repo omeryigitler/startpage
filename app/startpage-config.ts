@@ -41,6 +41,6 @@ export const defaultConfig: StartpageConfig = {
   cities: [
     { name: "Sliema", country: "Malta", latitude: 35.9122, longitude: 14.5042, timezone: "Europe/Malta" },
     { name: "Eskişehir", country: "Türkiye", latitude: 39.7767, longitude: 30.5206, timezone: "Europe/Istanbul" },
-    { name: "Brüksel", country: "Belçika", latitude: 50.8503, longitude: 4.3517, timezone: "Europe/Brussels" }
+    { name: "Wetteren", country: "Belçika", latitude: 51.0069, longitude: 3.8855, timezone: "Europe/Brussels" }
   ]
 };
