@@ -15,13 +15,13 @@ export type TaurusJwt = JWT & {
 
 export async function refreshGoogleIdentity(token: TaurusJwt): Promise<TaurusJwt> {
   if (!token.googleRefreshToken) {
-    return { ...token, googleAuthError: "GoogleRefreshTokenMissing" };
+    return { ...token, googleIdToken: undefined, googleAuthError: "GoogleRefreshTokenMissing" };
   }
 
   const clientId = process.env.GOOGLE_CLIENT_ID || "";
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET || "";
   if (!clientId || !clientSecret) {
-    return { ...token, googleAuthError: "GoogleOAuthConfigMissing" };
+    return { ...token, googleIdToken: undefined, googleAuthError: "GoogleOAuthConfigMissing" };
   }
 
   try {
@@ -52,14 +52,14 @@ export async function refreshGoogleIdentity(token: TaurusJwt): Promise<TaurusJwt
     return {
       ...token,
       googleAccessToken: refreshed.access_token || token.googleAccessToken,
-      googleIdToken: refreshed.id_token || token.googleIdToken,
+      googleIdToken: refreshed.id_token || undefined,
       googleRefreshToken: refreshed.refresh_token || token.googleRefreshToken,
       googleTokenExpiresAt: Date.now() + Math.max(60, Number(refreshed.expires_in || 3600)) * 1000,
-      googleAuthError: refreshed.id_token || token.googleIdToken ? undefined : "GoogleIdTokenMissing",
+      googleAuthError: refreshed.id_token ? undefined : "GoogleIdTokenMissing",
     };
   } catch (error) {
     console.error("Google identity refresh failed", error);
-    return { ...token, googleAuthError: "GoogleIdentityRefreshFailed" };
+    return { ...token, googleIdToken: undefined, googleAuthError: "GoogleIdentityRefreshFailed" };
   }
 }
 
