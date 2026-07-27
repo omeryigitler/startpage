@@ -49,9 +49,14 @@ function safeHttpUrl(value: string) {
   }
 }
 
+function isExplicitWebQuery(value: string) {
+  const raw = String(value || "").trim();
+  return raw.startsWith("?") || /^(g|web)\s*:/i.test(raw);
+}
+
 function isWeatherQuery(value: string) {
   const raw = String(value || "").trim();
-  if (!raw || raw.startsWith("@") || raw.startsWith("?") || /^(a|g|web)\s*:/i.test(raw)) return false;
+  if (!raw || raw.startsWith("@") || isExplicitWebQuery(raw) || /^a\s*:/i.test(raw)) return false;
   return WEATHER_PATTERN.test(normalizeCommand(raw));
 }
 
@@ -60,7 +65,7 @@ function weatherQueryFromGoogleUrl(value: string) {
     const parsed = new URL(value);
     if (!/(^|\.)google\./i.test(parsed.hostname) || !parsed.pathname.includes("search")) return null;
     const query = parsed.searchParams.get("q") || "";
-    return isWeatherQuery(query) ? query : null;
+    return WEATHER_PATTERN.test(normalizeCommand(query)) ? query : null;
   } catch {
     return null;
   }
@@ -138,8 +143,9 @@ export default function TaurusCommandEnhancements() {
     const nativeOpen = window.open.bind(window);
     const patchedOpen: typeof window.open = ((url?: string | URL, target?: string, features?: string) => {
       const rawUrl = typeof url === "string" ? url : url?.toString() || "";
+      const currentInput = document.querySelector<HTMLInputElement>(".centerSearchForm input")?.value || "";
       const weatherQuery = weatherQueryFromGoogleUrl(rawUrl);
-      if (weatherQuery) {
+      if (weatherQuery && !isExplicitWebQuery(currentInput)) {
         window.dispatchEvent(new CustomEvent(WEATHER_EVENT, { detail: { query: weatherQuery } }));
         return window;
       }
