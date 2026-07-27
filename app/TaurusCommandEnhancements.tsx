@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   Cloud,
@@ -16,11 +16,37 @@ import {
   X,
 } from "lucide-react";
 import { normalizeCommand } from "./command-router";
-import { defaultConfig, type StartpageConfig } from "./startpage-config";
 
-const STORAGE_KEY = "startpage-config-v1";
 const WEATHER_EVENT = "taurus:weather-request";
 const WEATHER_PATTERN = /\b(hava|weather|sicaklik|derece|meteoroloji)\b/i;
+const WEATHER_ONLY_WORDS = /\b(hava|durumu|weather|sicaklik|derece|meteoroloji|kac|bugun|simdi|nasil)\b/gi;
+
+const WEATHER_LOCATIONS = [
+  {
+    name: "Sliema",
+    country: "Malta",
+    latitude: 35.9122,
+    longitude: 14.5042,
+    timezone: "Europe/Malta",
+    aliases: ["sliema", "malta"],
+  },
+  {
+    name: "Eskişehir",
+    country: "Türkiye",
+    latitude: 39.7767,
+    longitude: 30.5206,
+    timezone: "Europe/Istanbul",
+    aliases: ["eskisehir", "eskişehir"],
+  },
+  {
+    name: "Wetteren",
+    country: "Belçika",
+    latitude: 51.0069,
+    longitude: 3.8855,
+    timezone: "Europe/Brussels",
+    aliases: ["wetteren", "gent", "ghent"],
+  },
+] as const;
 
 type WeatherPayload = {
   temp: number;
@@ -71,13 +97,20 @@ function weatherQueryFromGoogleUrl(value: string) {
   }
 }
 
-function findCity(query: string, config: StartpageConfig) {
+function findWeatherLocation(query: string) {
   const normalized = normalizeCommand(query);
-  return config.cities.find((city) => {
-    const name = normalizeCommand(city.name);
-    const country = normalizeCommand(city.country);
-    return normalized.includes(name) || normalized.includes(country);
-  }) || config.cities[0] || defaultConfig.cities[0];
+  const matched = WEATHER_LOCATIONS.find((location) =>
+    location.aliases.some((alias) => normalized.includes(normalizeCommand(alias))),
+  );
+  if (matched) return matched;
+
+  const remaining = normalized
+    .replace(WEATHER_ONLY_WORDS, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  WEATHER_ONLY_WORDS.lastIndex = 0;
+
+  return remaining ? null : WEATHER_LOCATIONS[0];
 }
 
 function WeatherIcon({ code, isDay }: { code: number; isDay: boolean }) {
@@ -94,33 +127,9 @@ function WeatherIcon({ code, isDay }: { code: number; isDay: boolean }) {
 
 export default function TaurusCommandEnhancements() {
   const [portal, setPortal] = useState<HTMLElement | null>(null);
-  const [config, setConfig] = useState<StartpageConfig>(defaultConfig);
   const [weather, setWeather] = useState<WeatherView | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const configRef = useRef(config);
-
-  useEffect(() => { configRef.current = config; }, [config]);
-
-  useEffect(() => {
-    const cached = localStorage.getItem(STORAGE_KEY);
-    if (cached) {
-      try {
-        const parsed = { ...defaultConfig, ...JSON.parse(cached) } as StartpageConfig;
-        setConfig(parsed);
-        configRef.current = parsed;
-      } catch {}
-    }
-    fetch("/api/state", { cache: "no-store" })
-      .then((response) => response.json())
-      .then((data: { config?: StartpageConfig; hasStoredState?: boolean }) => {
-        if (data.hasStoredState && data.config) {
-          setConfig(data.config);
-          configRef.current = data.config;
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     let observer: MutationObserver | null = null;
@@ -196,22 +205,28 @@ export default function TaurusCommandEnhancements() {
 
     const onWeather = async (event: Event) => {
       const query = (event as CustomEvent<{ query?: string }>).detail?.query || "hava durumu";
-      const city = findCity(query, configRef.current);
+      const location = findWeatherLocation(query);
       setWeather(null);
       setError("");
-      setLoading(true);
       document.querySelector<HTMLButtonElement>(".taurusCommandPanel>header>button")?.click();
 
+      if (!location) {
+        setLoading(false);
+        setError("Şehir bulunamadı. Sliema, Eskişehir veya Wetteren yazarak tekrar deneyin.");
+        return;
+      }
+
+      setLoading(true);
       try {
         const params = new URLSearchParams({
-          lat: String(city.latitude),
-          lon: String(city.longitude),
-          timezone: city.timezone || "auto",
+          lat: String(location.latitude),
+          lon: String(location.longitude),
+          timezone: location.timezone,
         });
         const response = await fetch(`/api/weather?${params.toString()}`, { cache: "no-store" });
         const payload = (await response.json()) as WeatherPayload;
         if (!response.ok || payload.error) throw new Error(payload.error || "Hava durumu alınamadı.");
-        setWeather({ ...payload, city: city.name, country: city.country });
+        setWeather({ ...payload, city: location.name, country: location.country });
       } catch (weatherError) {
         setError(weatherError instanceof Error ? weatherError.message : "Hava durumu alınamadı.");
       } finally {
@@ -232,7 +247,7 @@ export default function TaurusCommandEnhancements() {
   return createPortal(
     <section className="taurusWeatherCard" aria-live="polite">
       <header>
-        <div><span /><strong>HAVA DURUMU</strong><small>{loading ? "GÜNCELLENİYOR" : error ? "BAĞLANTI HATASI" : "CANLI"}</small></div>
+        <div><span /><strong>HAVA DURUMU</strong><small>{loading ? "GÜNCELLENİYOR" : error ? "BAĞLANTI HATASI" : "GÜNCEL"}</small></div>
         <button type="button" onClick={() => { setWeather(null); setError(""); }} aria-label="Hava durumunu kapat"><X size={15} /></button>
       </header>
 
@@ -252,6 +267,7 @@ export default function TaurusCommandEnhancements() {
             <div><Droplets size={15} /><span>YAĞIŞ</span><strong>%{weather.rain}</strong></div>
             <div><Wind size={15} /><span>RÜZGÂR</span><strong>{weather.wind} km/sa</strong></div>
           </div>
+          <footer className="taurusWeatherSource">VERİ: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">OPEN-METEO</a> · EN FAZLA 5 DK ÖNBELLEK</footer>
         </div>
       )}
     </section>,
