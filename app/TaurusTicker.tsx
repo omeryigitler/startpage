@@ -20,15 +20,31 @@ export default function TaurusTicker() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const root = document.querySelector<HTMLElement>(".taurusStartpage");
-    if (!root) return;
+    let mountObserver: MutationObserver | null = null;
+    let classObserver: MutationObserver | null = null;
 
-    const syncVisibility = () => setVisible(root.classList.contains("is-launched"));
-    syncVisibility();
+    const bind = () => {
+      const root = document.querySelector<HTMLElement>(".taurusStartpage");
+      if (!root) return false;
 
-    const observer = new MutationObserver(syncVisibility);
-    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
+      const syncVisibility = () => setVisible(root.classList.contains("is-launched"));
+      syncVisibility();
+      classObserver = new MutationObserver(syncVisibility);
+      classObserver.observe(root, { attributes: true, attributeFilter: ["class"] });
+      return true;
+    };
+
+    if (!bind()) {
+      mountObserver = new MutationObserver(() => {
+        if (bind()) mountObserver?.disconnect();
+      });
+      mountObserver.observe(document.body, { childList: true, subtree: true });
+    }
+
+    return () => {
+      mountObserver?.disconnect();
+      classObserver?.disconnect();
+    };
   }, []);
 
   useEffect(() => {
