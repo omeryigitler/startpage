@@ -1,0 +1,2 @@
+.centerLogoButton.taurus-listening::after{content:none!important;display:none!important}
+.taurusCommandPanel>header span.is-live~small{display:none!important}
