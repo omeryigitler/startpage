@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "Startpage — Ömer Yiğitler",
+  "short_name": "Startpage",
+  "description": "Ömer Yiğitler için kişisel başlangıç sayfası",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
