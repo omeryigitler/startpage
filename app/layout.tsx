@@ -18,6 +18,7 @@ import "./taurus-command-bridge.css";
 import "./taurus-command-labels.css";
 import "./taurus-listening-cleanup.css";
 import "./taurus-weather-command.css";
+import "./history-entry.css";
 import TaurusTicker from "./TaurusTicker";
 import TaurusCommandBridge from "./TaurusCommandBridge";
 import TaurusCommandEnhancements from "./TaurusCommandEnhancements";

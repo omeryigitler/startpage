@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "./history.css";
 
 export const metadata: Metadata = {
   title: "The History Archived — Content Command Center",
