@@ -410,6 +410,7 @@ export default function HistoryArchivedWorkspace() {
         tasks={data.tasks.filter((task) => task.videoId === videoDraft.id)}
         events={data.workflowEvents.filter((event) => event.videoId === videoDraft.id)}
         series={data.series}
+        workflow={data.settings.workflow}
         tab={videoTab}
         setTab={setVideoTab}
         saveState={saveState}
