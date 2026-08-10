@@ -2,12 +2,12 @@
 
 import { ArrowLeft, Check, ChevronRight, Save, Trash2, Youtube, X } from "lucide-react";
 import {
-  HISTORY_PROGRESS,
-  HISTORY_STATUSES,
+  getWorkflowProgress,
   getYouTubeEmbedUrl,
   type HistorySeries,
   type HistorySource,
   type HistoryTask,
+  type HistoryWorkflowStep,
   type PromptAsset,
   type TaskStatus,
   type Video,
@@ -33,7 +33,7 @@ function RecordForm({ title, children, onSubmit, onCancel, submitLabel }: { titl
 function splitLines(value: string) { return value.split("\n").map((x) => x.trim()).filter(Boolean); }
 function joinLines(value: string[]) { return value.join("\n"); }
 
-export function VideoEditor({ video, setVideo, sources, prompts, tasks, events, series, tab, setTab, saveState, onBack, onSave, onDelete, onStatus, sourceDraft, setSourceDraft, assetDraft, setAssetDraft, taskDraft, setTaskDraft, onSubmitSource, onSubmitAsset, onSubmitTask, onDeleteItem }: {
+export function VideoEditor({ video, setVideo, sources, prompts, tasks, events, series, workflow, tab, setTab, saveState, onBack, onSave, onDelete, onStatus, sourceDraft, setSourceDraft, assetDraft, setAssetDraft, taskDraft, setTaskDraft, onSubmitSource, onSubmitAsset, onSubmitTask, onDeleteItem }: {
   video: Video;
   setVideo: (video: Video) => void;
   sources: HistorySource[];
@@ -41,6 +41,7 @@ export function VideoEditor({ video, setVideo, sources, prompts, tasks, events, 
   tasks: HistoryTask[];
   events: WorkflowEvent[];
   series: HistorySeries[];
+  workflow: HistoryWorkflowStep[];
   tab: string;
   setTab: (tab: string) => void;
   saveState: SaveState;
@@ -60,8 +61,9 @@ export function VideoEditor({ video, setVideo, sources, prompts, tasks, events, 
   onDeleteItem: (resource: "sources" | "assets" | "tasks", id: string) => void;
 }) {
   const tabs = ["overview", "idea", "production", "packaging", "legal", "analytics", "sources", "assets", "tasks", "history"];
-  const currentIndex = HISTORY_STATUSES.indexOf(video.status);
-  const nextStatus = HISTORY_STATUSES[Math.min(currentIndex + 1, HISTORY_STATUSES.length - 1)];
+  const statuses = workflow.map((step) => step.name);
+  const currentIndex = Math.max(0, statuses.indexOf(video.status));
+  const nextStatus = statuses[Math.min(currentIndex + 1, Math.max(0, statuses.length - 1))] || video.status;
   const embed = getYouTubeEmbedUrl(video.youtubeUrl);
   const set = <K extends keyof Video>(key: K, value: Video[K]) => setVideo({ ...video, [key]: value });
 
@@ -73,12 +75,12 @@ export function VideoEditor({ video, setVideo, sources, prompts, tasks, events, 
         <p>{video.coreTopic || "No topic summary entered."}</p>
       </div>
       <div className="thaEditorActions">
-        <select className="thaStatusSelect" value={video.status} onChange={(e) => onStatus(e.target.value as VideoStatus)}>{HISTORY_STATUSES.map((status) => <option key={status}>{status}</option>)}</select>
+        <select className="thaStatusSelect" value={video.status} onChange={(e) => onStatus(e.target.value)}>{statuses.map((status) => <option key={status}>{status}</option>)}</select>
         <button className="thaPrimary" onClick={onSave}><Save size={16} />{saveState === "saving" ? "Saving…" : "Save video"}</button>
         <button className="thaIconButton danger" onClick={onDelete}><Trash2 size={16} /></button>
       </div>
     </header>
-    <div className="thaProgress"><i style={{ width: `${HISTORY_PROGRESS[video.status]}%` }} /></div>
+    <div className="thaProgress"><i style={{ width: `${getWorkflowProgress(video.status, workflow)}%` }} /></div>
     <nav className="thaEditorTabs">{tabs.map((item) => <button className={tab === item ? "active" : ""} onClick={() => setTab(item)} key={item}>{item}</button>)}</nav>
     <main className="thaEditorBody">
       {tab === "overview" ? <div className="thaEditorGrid">
