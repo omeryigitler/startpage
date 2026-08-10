@@ -1,0 +1,37 @@
+html,body{scrollbar-width:none!important;-ms-overflow-style:none!important}
+html::-webkit-scrollbar,body::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+.thaApp *,.thaEditor *,.thaWorkflowPage *{scrollbar-width:none!important;-ms-overflow-style:none!important}
+.thaApp *::-webkit-scrollbar,.thaEditor *::-webkit-scrollbar,.thaWorkflowPage *::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+.thaWorkflowPreview{resize:none!important}
+.thaField input[type="number"]{-moz-appearance:textfield}
+.thaField input[type="number"]::-webkit-inner-spin-button,.thaField input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.thaNativeSelectHidden{display:none!important}
+.thaCustomSelectTrigger{position:relative;min-width:0;border:1px solid var(--tha-line);border-radius:8px;background:#080809;color:#e2e2df;outline:0;display:flex;align-items:center;justify-content:flex-start;text-align:left;padding:0 30px 0 10px;font:500 10px Inter,system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.thaCustomSelectTrigger::after{content:"";position:absolute;right:11px;top:50%;width:6px;height:6px;border-right:1px solid #777b82;border-bottom:1px solid #777b82;transform:translateY(-65%) rotate(45deg);transition:transform .15s ease}
+.thaCustomSelectTrigger[aria-expanded="true"]{border-color:rgba(255,215,0,.38);box-shadow:0 0 0 2px rgba(255,215,0,.035)}
+.thaCustomSelectTrigger[aria-expanded="true"]::after{transform:translateY(-30%) rotate(225deg)}
+.thaField>.thaCustomSelectTrigger{width:100%;height:36px}
+.thaEditorActions>.thaCustomSelectTrigger{height:36px;min-width:180px;width:auto;max-width:260px;font:600 9px JetBrains Mono,monospace}
+.thaKanbanCard>.thaCustomSelectTrigger{width:100%;height:29px;margin-top:10px;border-radius:6px;color:#898d94;font:500 8px Inter,system-ui,sans-serif;padding-left:7px;padding-right:24px}
+.thaKanbanCard>.thaCustomSelectTrigger::after{right:9px;width:5px;height:5px}
+.thaSelectScrim{position:fixed;inset:0;border:0;background:transparent;z-index:1190;cursor:default}
+.thaCustomSelectMenu{position:fixed;z-index:1200;border:1px solid rgba(255,215,0,.18);border-radius:10px;background:rgba(9,9,10,.985);box-shadow:0 18px 50px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.03);padding:5px;overflow:auto;overscroll-behavior:contain}
+.thaCustomSelectMenu button{width:100%;min-height:32px;border:0;border-radius:7px;background:transparent;color:#92969e;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 9px;text-align:left;font:500 9px/1.35 JetBrains Mono,monospace;cursor:pointer}
+.thaCustomSelectMenu button:hover,.thaCustomSelectMenu button:focus-visible{background:#131315;color:#f2f2ef;outline:0}
+.thaCustomSelectMenu button.active{background:rgba(255,215,0,.1);color:var(--tha-gold)}
+.thaCustomSelectMenu button.active::after{content:"✓";font-size:10px}
+.thaCustomSelectMenu button:disabled{opacity:.35;cursor:not-allowed}
+.thaUxDialogScrim{position:fixed;inset:0;z-index:1290;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);display:grid;place-items:center;padding:20px}
+.thaUxDialog{width:min(430px,100%);border:1px solid rgba(255,215,0,.18);border-radius:16px;background:linear-gradient(145deg,#111113,#080809);box-shadow:0 26px 80px rgba(0,0,0,.64);padding:20px;color:var(--tha-text)}
+.thaUxDialogHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:13px}
+.thaUxDialogHead>div{display:grid;gap:5px}
+.thaUxDialogHead small{color:var(--tha-gold);font:600 8px JetBrains Mono,monospace;letter-spacing:.12em;text-transform:uppercase}
+.thaUxDialogHead strong{font-size:15px}
+.thaUxDialogClose{width:32px;height:32px;border:1px solid var(--tha-line);border-radius:8px;background:#0a0a0b;color:#8b8f96;display:grid;place-items:center;cursor:pointer}
+.thaUxDialog p{margin:0;color:#989ca3;font-size:11px;line-height:1.65;white-space:pre-wrap}
+.thaUxDialogActions{display:flex;justify-content:flex-end;gap:8px;margin-top:19px}
+.thaUxDialogActions button{min-height:35px;padding:0 13px;border-radius:8px;font:700 9px JetBrains Mono,monospace;cursor:pointer}
+.thaUxDialogCancel{border:1px solid var(--tha-line);background:#0b0b0c;color:#a9adb3}
+.thaUxDialogConfirm{border:1px solid var(--tha-gold);background:var(--tha-gold);color:#050505}
+.thaUxDialogConfirm.danger{border-color:#7f3838;background:#5a2424;color:#fff!important}
+@media(max-width:720px){.thaEditorActions>.thaCustomSelectTrigger{width:100%;max-width:none}.thaCustomSelectMenu{max-width:calc(100vw - 20px)}}
