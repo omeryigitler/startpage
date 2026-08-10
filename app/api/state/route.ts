@@ -7,6 +7,11 @@ import { defaultConfig, type StartpageConfig } from "../../startpage-config";
 export const dynamic = "force-dynamic";
 
 const STATE_ID = "main";
+const HISTORY_PROJECT = {
+  name: "The History Archived",
+  url: "https://start.omeryigitler.com/history",
+  status: "Content Command Center",
+};
 
 type StoredRow = {
   config: StartpageConfig;
@@ -16,6 +21,16 @@ type StoredRow = {
 
 function databaseUrl() {
   return process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
+}
+
+function withHistoryProject(config: StartpageConfig): StartpageConfig {
+  const exists = config.projects.some(
+    (project) =>
+      project.url === HISTORY_PROJECT.url ||
+      project.name.toLocaleLowerCase("tr") === HISTORY_PROJECT.name.toLocaleLowerCase("tr"),
+  );
+  if (exists) return config;
+  return { ...config, projects: [...config.projects, HISTORY_PROJECT] };
 }
 
 function validConfig(value: unknown): value is StartpageConfig {
@@ -50,7 +65,7 @@ async function ensureState(createIfMissing: boolean) {
        VALUES ($1, $2::jsonb, '')
        ON CONFLICT (id) DO NOTHING
        RETURNING id`,
-      [STATE_ID, JSON.stringify(defaultConfig)]
+      [STATE_ID, JSON.stringify(withHistoryProject(defaultConfig))]
     );
   }
 
@@ -70,7 +85,7 @@ export async function GET(request: Request) {
 
     if (!state?.row) {
       return NextResponse.json({
-        config: defaultConfig,
+        config: withHistoryProject(defaultConfig),
         note: "",
         canEdit,
         setupRequired: !databaseUrl(),
@@ -80,7 +95,7 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({
-      config: state.row.config,
+      config: withHistoryProject(state.row.config),
       note: canEdit ? state.row.note : "",
       canEdit,
       setupRequired: false,
@@ -91,7 +106,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("State GET failed", error);
     return NextResponse.json({
-      config: defaultConfig,
+      config: withHistoryProject(defaultConfig),
       note: "",
       canEdit: false,
       setupRequired: true,
@@ -114,16 +129,17 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json() as { config?: unknown; note?: unknown };
-    const nextConfig = body.config === undefined ? state.row.config : body.config;
+    const requestedConfig = body.config === undefined ? state.row.config : body.config;
     const nextNote = body.note === undefined ? state.row.note : body.note;
 
-    if (!validConfig(nextConfig)) {
+    if (!validConfig(requestedConfig)) {
       return NextResponse.json({ error: "Geçersiz yapılandırma." }, { status: 400 });
     }
     if (typeof nextNote !== "string") {
       return NextResponse.json({ error: "Geçersiz not." }, { status: 400 });
     }
 
+    const nextConfig = withHistoryProject(requestedConfig);
     const trimmedNote = nextNote.slice(0, 10000);
     const rows = await state.sql.query(
       `UPDATE startpage_state
