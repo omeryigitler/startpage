@@ -1,5 +1,5 @@
-/* The History Archived uses the same real THA brand mark inside the Startpage Projects module. */
+/* The History Archived project uses its real embedded brand mark inside Startpage. */
 a[href*="start.omeryigitler.com/history"] .taurusLinkIcon,
-a[href="/history"] .taurusLinkIcon{background:center/contain no-repeat url('/api/history-brand/logo')!important}
+a[href="/history"] .taurusLinkIcon{background-image:var(--history-project-logo)!important;background-position:center!important;background-repeat:no-repeat!important;background-size:contain!important}
 a[href*="start.omeryigitler.com/history"] .taurusLinkIcon img,
 a[href="/history"] .taurusLinkIcon img{opacity:0!important}
