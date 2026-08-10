@@ -19,6 +19,7 @@ import {
   Scale,
   Settings2,
   Sparkles,
+  Workflow,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -41,18 +42,19 @@ import {
   Dashboard,
   IdeasPage,
   LegalPage,
-  ProductionPage,
   ResearchPage,
   SeriesPage,
   SettingsPage,
   VideosPage,
 } from "./HistoryPages";
 import { VideoEditor } from "./VideoEditor";
+import { WorkflowPage, WorkflowProductionPage } from "./WorkflowPage";
 
 type PageId =
   | "dashboard"
   | "videos"
   | "production"
+  | "workflow"
   | "research"
   | "assets"
   | "ideas"
@@ -69,6 +71,7 @@ const NAV: Array<{ id: PageId; label: string; icon: typeof LayoutDashboard }> = 
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "videos", label: "Videos", icon: Film },
   { id: "production", label: "Production", icon: FolderKanban },
+  { id: "workflow", label: "Workflow", icon: Workflow },
   { id: "research", label: "Research", icon: FileText },
   { id: "assets", label: "Assets & Prompts", icon: ImageIcon },
   { id: "ideas", label: "Ideas", icon: Sparkles },
@@ -458,7 +461,8 @@ export default function HistoryArchivedWorkspace() {
 
         {page === "dashboard" && <Dashboard data={data} onOpen={openVideo} onNavigate={setPage} />}
         {page === "videos" && <VideosPage videos={filteredVideos} query={query} setQuery={setQuery} newTitle={newVideoTitle} setNewTitle={setNewVideoTitle} onCreate={() => void createVideo()} onOpen={openVideo} onDelete={(id) => void deleteVideo(id)} />}
-        {page === "production" && <ProductionPage videos={data.videos} onOpen={openVideo} onStatus={(video, status) => void changeStatus(video, status)} />}
+        {page === "production" && <WorkflowProductionPage videos={data.videos} workflow={data.settings.workflow} onOpen={openVideo} onStatus={(video, status) => void changeStatus(video, status)} onConfigure={() => setPage("workflow")} />}
+        {page === "workflow" && <WorkflowPage settings={settingsDraft} videos={data.videos} setSettings={setSettingsDraft} onSave={() => void saveSettings()} saveState={saveState} />}
         {page === "research" && <ResearchPage videos={data.videos} sources={data.sources} draft={sourceDraft} setDraft={setSourceDraft} onSubmit={() => void submitSource()} onDelete={(id) => void deleteItem("sources", id)} onOpen={openVideo} />}
         {page === "assets" && <AssetsPage videos={data.videos} prompts={data.prompts} draft={assetDraft} setDraft={setAssetDraft} onSubmit={() => void submitAsset()} onDelete={(id) => void deleteItem("assets", id)} onOpen={openVideo} />}
         {page === "ideas" && <IdeasPage videos={data.videos} onOpen={openVideo} onCreate={() => void createVideo()} />}
