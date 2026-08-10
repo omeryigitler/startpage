@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
+  Archive,
   ArrowUpRight,
   Bot,
   BrainCircuit,
@@ -29,7 +30,7 @@ import {
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { defaultConfig, StartpageConfig } from "./startpage-config";
+import { defaultConfig, normalizeEnglishConfig, StartpageConfig } from "./startpage-config";
 import NotesModal from "./NotesModal";
 
 const STORAGE_KEY = "startpage-config-v1";
@@ -58,7 +59,8 @@ type FolderSlide =
     }
   | { id: string; kind: "projects"; title: string; subtitle: string }
   | { id: string; kind: "daily"; title: string; subtitle: string }
-  | { id: string; kind: "system"; title: string; subtitle: string };
+  | { id: string; kind: "system"; title: string; subtitle: string }
+  | { id: string; kind: "history"; title: string; subtitle: string; href: string };
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -77,10 +79,10 @@ const slideVariants = {
 };
 
 function greetingForHour(hour: number) {
-  if (hour < 5) return "İyi geceler, Ömer.";
-  if (hour < 12) return "Günaydın, Ömer.";
-  if (hour < 18) return "İyi günler, Ömer.";
-  return "İyi akşamlar, Ömer.";
+  if (hour < 5) return "Good night, Ömer.";
+  if (hour < 12) return "Good morning, Ömer.";
+  if (hour < 18) return "Good afternoon, Ömer.";
+  return "Good evening, Ömer.";
 }
 
 function faviconUrl(url: string) {
@@ -96,13 +98,14 @@ function iconForSlide(slide: FolderSlide): LucideIcon {
   if (slide.kind === "projects") return FolderKanban;
   if (slide.kind === "daily") return Activity;
   if (slide.kind === "system") return SlidersHorizontal;
+  if (slide.kind === "history") return Archive;
 
-  const title = slide.title.toLocaleLowerCase("tr");
-  if (title.includes("çalışma") || title.includes("araç")) return Workflow;
-  if (title.includes("yapay") || title.includes("zekâ") || title.includes("zeka")) return BrainCircuit;
-  if (title.includes("tasarım")) return Palette;
-  if (title.includes("sosyal") || title.includes("iletişim")) return MessagesSquare;
-  if (title.includes("araştırma")) return Radar;
+  const title = slide.title.toLocaleLowerCase("en-US");
+  if (title.includes("work") || title.includes("tool")) return Workflow;
+  if (title.includes("ai") || title.includes("artificial")) return BrainCircuit;
+  if (title.includes("design")) return Palette;
+  if (title.includes("social") || title.includes("communication")) return MessagesSquare;
+  if (title.includes("research")) return Radar;
   return LayoutDashboard;
 }
 
@@ -125,7 +128,7 @@ export default function Home() {
 
   const greeting = config.greeting?.trim() || greetingForHour(now.getHours());
   const date = useMemo(
-    () => new Intl.DateTimeFormat("tr-TR", { weekday: "long", day: "numeric", month: "long" }).format(now),
+    () => new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" }).format(now),
     [now],
   );
 
@@ -138,16 +141,17 @@ export default function Home() {
         subtitle: folder.subtitle,
         links: folder.links,
       })),
-      { id: "projects", kind: "projects", title: "Projeler", subtitle: "Aktif işler ve canlı yayınlar" },
-      { id: "daily", kind: "daily", title: "Günlük", subtitle: "Hava, piyasa ve günün durumu" },
-      { id: "system", kind: "system", title: "Sistem", subtitle: "Notlar, yönetim ve Taurus Agent" },
+      { id: "projects", kind: "projects", title: "Projects", subtitle: "Active work and live deployments" },
+      { id: "daily", kind: "daily", title: "Daily", subtitle: "Weather, markets and today's status" },
+      { id: "system", kind: "system", title: "System", subtitle: "Notes, management and Taurus Agent" },
+      { id: "history-archived", kind: "history", title: "The History Archived", subtitle: "Documentary production command center", href: "/history" },
     ],
     [config.folders],
   );
 
   const allItems = useMemo<SearchItem[]>(
     () => [
-      ...config.projects.map((project) => ({ name: project.name, url: project.url, group: "Projeler" })),
+      ...config.projects.map((project) => ({ name: project.name, url: project.url, group: "Projects" })),
       ...config.folders.flatMap((folder) =>
         folder.links.map((link) => ({ name: link.name, url: link.url, group: folder.title })),
       ),
@@ -158,7 +162,7 @@ export default function Home() {
   const results = query.trim()
     ? allItems
         .filter((item) =>
-          `${item.name} ${item.group}`.toLocaleLowerCase("tr").includes(query.toLocaleLowerCase("tr")),
+          `${item.name} ${item.group}`.toLocaleLowerCase("en-US").includes(query.toLocaleLowerCase("en-US")),
         )
         .slice(0, 8)
     : [];
@@ -229,7 +233,8 @@ export default function Home() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
-        setConfig({ ...defaultConfig, ...JSON.parse(raw) });
+        const stored = { ...defaultConfig, ...JSON.parse(raw) } as StartpageConfig;
+        setConfig(normalizeEnglishConfig(stored));
       } catch {}
     }
 
@@ -239,8 +244,9 @@ export default function Home() {
         const data = (await response.json()) as StatePayload;
         setCanEdit(Boolean(data.canEdit));
         if (response.ok && data.hasStoredState && data.config) {
-          setConfig(data.config);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(data.config));
+          const nextConfig = normalizeEnglishConfig(data.config);
+          setConfig(nextConfig);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(nextConfig));
         }
       } catch {}
     }
@@ -323,7 +329,7 @@ export default function Home() {
               </span>
               <span>
                 <strong>{link.name}</strong>
-                <small>{link.note || "Bağlantıyı aç"}</small>
+                <small>{link.note || "Open link"}</small>
               </span>
               <ArrowUpRight size={17} />
             </a>
@@ -343,7 +349,7 @@ export default function Home() {
               </span>
               <div>
                 <strong>{project.name}</strong>
-                <small>{project.status || "Aktif proje"}</small>
+                <small>{project.status || "Active project"}</small>
               </div>
               <ArrowUpRight size={17} />
             </a>
@@ -357,8 +363,8 @@ export default function Home() {
         <div className="dailyFolderGrid">
           <article className="dailyPanel weatherPanel">
             <header>
-              <span><CloudSun size={18} /> Hava</span>
-              <small>CANLI</small>
+              <span><CloudSun size={18} /> Weather</span>
+              <small>LIVE</small>
             </header>
             {config.cities.slice(0, 3).map((city) => {
               const data = weather[`${city.name}-${city.country}`];
@@ -376,8 +382,8 @@ export default function Home() {
 
           <article className="dailyPanel marketPanel">
             <header>
-              <span><TrendingUp size={18} /> Piyasalar</span>
-              <small>5 DK</small>
+              <span><TrendingUp size={18} /> Markets</span>
+              <small>5 MIN</small>
             </header>
             {config.markets.slice(0, 5).map((item) => {
               const data = markets[item.symbol];
@@ -398,12 +404,24 @@ export default function Home() {
 
           <article className="dailyPanel dayStatusPanel">
             <header>
-              <span><Clock3 size={18} /> Sistem Saati</span>
+              <span><Clock3 size={18} /> System Time</span>
             </header>
-            <strong>{now.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}</strong>
+            <strong>{now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</strong>
             <p>{date}</p>
             <div><MapPin size={15} /> Malta</div>
           </article>
+        </div>
+      );
+    }
+
+    if (slide.kind === "history") {
+      return (
+        <div className="systemFolderGrid">
+          <Link href={slide.href}>
+            <Archive size={23} />
+            <span><strong>The History Archived</strong><small>Open the documentary production workspace</small></span>
+            <ArrowUpRight size={17} />
+          </Link>
         </div>
       );
     }
@@ -412,22 +430,22 @@ export default function Home() {
       <div className="systemFolderGrid">
         <button type="button" onClick={openNotes}>
           <NotebookPen size={23} />
-          <span><strong>Notlar</strong><small>Başlık, tarih, görsel ve PDF</small></span>
+          <span><strong>Notes</strong><small>Title, date, image and PDF</small></span>
           <ArrowUpRight size={17} />
         </button>
         <Link href="/yonetim">
           <Settings2 size={23} />
-          <span><strong>Yönetim</strong><small>Klasörleri ve bağlantıları düzenle</small></span>
+          <span><strong>Management</strong><small>Edit folders and links</small></span>
           <ArrowUpRight size={17} />
         </Link>
         <a href="https://omeryigitler.com/agent.html" target="_blank" rel="noreferrer">
           <Bot size={23} />
-          <span><strong>Taurus Agent</strong><small>omeryigitler.com yönetim asistanı</small></span>
+          <span><strong>Taurus Agent</strong><small>omeryigitler.com management assistant</small></span>
           <ArrowUpRight size={17} />
         </a>
         <a href="https://omeryigitler.com" target="_blank" rel="noreferrer">
           <Gauge size={23} />
-          <span><strong>omeryigitler.com</strong><small>Ana portföyü aç</small></span>
+          <span><strong>omeryigitler.com</strong><small>Open main portfolio</small></span>
           <ArrowUpRight size={17} />
         </a>
       </div>
@@ -444,11 +462,11 @@ export default function Home() {
       <div className="taurusSystemBar" aria-hidden={!launched}>
         <span className="taurusSystemState"><i /> SYS-V8: STARTPAGE ACTIVE</span>
         <b>TAURUS OS</b>
-        <span>{now.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}</span>
+        <span>{now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</span>
       </div>
 
       <section className="centerLogoDock">
-        <button type="button" className="centerLogoButton" onClick={launchAndFocus} aria-label="Startpage'i aç">
+        <button type="button" className="centerLogoButton" onClick={launchAndFocus} aria-label="Open Startpage">
           <span className="logoScanLine" />
           {logoMissing ? (
             <span className="centerLogoFallback">OY<span>.</span></span>
@@ -467,7 +485,7 @@ export default function Home() {
             onChange={(event) => setQuery(event.target.value)}
             placeholder="GLOBAL COMMAND..."
           />
-          <button type="button" onClick={launchAndFocus} aria-label="Arama alanına odaklan">
+          <button type="button" onClick={launchAndFocus} aria-label="Focus search">
             <Command size={13} /> K <span>/</span>
           </button>
         </form>
@@ -485,7 +503,7 @@ export default function Home() {
                 </a>
               ))
             ) : (
-              <button type="submit"><Search size={16} /> Google’da “{query}” ara</button>
+              <button type="submit"><Search size={16} /> Search Google for “{query}”</button>
             )}
           </div>
         )}
@@ -521,7 +539,7 @@ export default function Home() {
                       <h1>{currentSlide.title}</h1>
                       <p>{currentSlide.subtitle}</p>
                     </div>
-                    <button type="button" className="closeFolderButton" onClick={() => setOpenFolderId(null)} aria-label="Modülü kapat">
+                    <button type="button" className="closeFolderButton" onClick={() => setOpenFolderId(null)} aria-label="Close module">
                       <X size={20} />
                     </button>
                   </header>
@@ -545,7 +563,13 @@ export default function Home() {
                     if (info.offset.x < -60) paginate(1);
                     if (info.offset.x > 60) paginate(-1);
                   }}
-                  onClick={() => setOpenFolderId(currentSlide.id)}
+                  onClick={() => {
+                    if (currentSlide.kind === "history") {
+                      window.location.href = currentSlide.href;
+                      return;
+                    }
+                    setOpenFolderId(currentSlide.id);
+                  }}
                 >
                   <span className="folderTab" />
                   <span className="folderScanLine" />
@@ -554,7 +578,7 @@ export default function Home() {
                   <small>MODULE {String(normalizedIndex + 1).padStart(2, "0")}</small>
                   <h1>{currentSlide.title}</h1>
                   <p>{currentSlide.subtitle}</p>
-                  <span className="folderEnter"><Link2 size={13} /> ENTER MODULE</span>
+                  <span className="folderEnter"><Link2 size={13} /> {currentSlide.kind === "history" ? "OPEN WORKSPACE" : "ENTER MODULE"}</span>
                 </motion.button>
               )}
             </AnimatePresence>
@@ -576,7 +600,7 @@ export default function Home() {
                   key={slide.id}
                   className={index === normalizedIndex ? "active" : ""}
                   onClick={() => selectSlide(index)}
-                  aria-label={`${slide.title} modülüne git`}
+                  aria-label={`Go to ${slide.title} module`}
                 />
               ))}
             </div>
