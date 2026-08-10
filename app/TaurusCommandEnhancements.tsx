@@ -18,8 +18,8 @@ import {
 import { normalizeCommand } from "./command-router";
 
 const WEATHER_EVENT = "taurus:weather-request";
-const WEATHER_PATTERN = /\b(hava|weather|sicaklik|derece|meteoroloji)\b/i;
-const WEATHER_ONLY_WORDS = /\b(hava|durumu|weather|sicaklik|derece|meteoroloji|kac|bugun|simdi|nasil)\b/gi;
+const WEATHER_PATTERN = /\b(hava|weather|sicaklik|derece|meteoroloji|temperature|forecast)\b/i;
+const WEATHER_ONLY_WORDS = /\b(hava|durumu|weather|sicaklik|derece|meteoroloji|temperature|forecast|kac|bugun|simdi|nasil|today|now)\b/gi;
 
 const WEATHER_LOCATIONS = [
   {
@@ -32,19 +32,19 @@ const WEATHER_LOCATIONS = [
   },
   {
     name: "Eskişehir",
-    country: "Türkiye",
+    country: "Turkey",
     latitude: 39.7767,
     longitude: 30.5206,
     timezone: "Europe/Istanbul",
-    aliases: ["eskisehir", "eskişehir"],
+    aliases: ["eskisehir", "eskişehir", "turkey", "turkiye", "türkiye"],
   },
   {
     name: "Wetteren",
-    country: "Belçika",
+    country: "Belgium",
     latitude: 51.0069,
     longitude: 3.8855,
     timezone: "Europe/Brussels",
-    aliases: ["wetteren", "gent", "ghent"],
+    aliases: ["wetteren", "gent", "ghent", "belgium", "belcika", "belçika"],
   },
 ] as const;
 
@@ -189,7 +189,7 @@ export default function TaurusCommandEnhancements() {
       expansion?.classList.toggle("taurus-weather-query", active);
       if (form && active) {
         form.dataset.commandMode = "weather";
-        form.dataset.commandLabel = "HAVA";
+        form.dataset.commandLabel = "WEATHER";
       }
     };
 
@@ -204,7 +204,7 @@ export default function TaurusCommandEnhancements() {
     };
 
     const onWeather = async (event: Event) => {
-      const query = (event as CustomEvent<{ query?: string }>).detail?.query || "hava durumu";
+      const query = (event as CustomEvent<{ query?: string }>).detail?.query || "weather";
       const location = findWeatherLocation(query);
       setWeather(null);
       setError("");
@@ -212,7 +212,7 @@ export default function TaurusCommandEnhancements() {
 
       if (!location) {
         setLoading(false);
-        setError("Şehir bulunamadı. Sliema, Eskişehir veya Wetteren yazarak tekrar deneyin.");
+        setError("City not found. Try Sliema, Eskişehir or Wetteren.");
         return;
       }
 
@@ -225,10 +225,10 @@ export default function TaurusCommandEnhancements() {
         });
         const response = await fetch(`/api/weather?${params.toString()}`, { cache: "no-store" });
         const payload = (await response.json()) as WeatherPayload;
-        if (!response.ok || payload.error) throw new Error(payload.error || "Hava durumu alınamadı.");
+        if (!response.ok || payload.error) throw new Error(payload.error || "Weather data could not be loaded.");
         setWeather({ ...payload, city: location.name, country: location.country });
       } catch (weatherError) {
-        setError(weatherError instanceof Error ? weatherError.message : "Hava durumu alınamadı.");
+        setError(weatherError instanceof Error ? weatherError.message : "Weather data could not be loaded.");
       } finally {
         setLoading(false);
       }
@@ -247,11 +247,11 @@ export default function TaurusCommandEnhancements() {
   return createPortal(
     <section className="taurusWeatherCard" aria-live="polite">
       <header>
-        <div><span /><strong>HAVA DURUMU</strong><small>{loading ? "GÜNCELLENİYOR" : error ? "BAĞLANTI HATASI" : "GÜNCEL"}</small></div>
-        <button type="button" onClick={() => { setWeather(null); setError(""); }} aria-label="Hava durumunu kapat"><X size={15} /></button>
+        <div><span /><strong>WEATHER</strong><small>{loading ? "UPDATING" : error ? "CONNECTION ERROR" : "LIVE"}</small></div>
+        <button type="button" onClick={() => { setWeather(null); setError(""); }} aria-label="Close weather"><X size={15} /></button>
       </header>
 
-      {loading && <div className="taurusWeatherLoading">ATMOSFER VERİSİ ALINIYOR...</div>}
+      {loading && <div className="taurusWeatherLoading">FETCHING ATMOSPHERIC DATA...</div>}
       {error && <div className="taurusWeatherError">{error}</div>}
 
       {weather && (
@@ -262,10 +262,10 @@ export default function TaurusCommandEnhancements() {
             <b>{weather.temp}°</b>
           </div>
           <div className="taurusWeatherMetrics">
-            <div><span>HİSSEDİLEN</span><strong>{weather.feels}°</strong></div>
-            <div><span>EN YÜKSEK / DÜŞÜK</span><strong>{weather.high}° / {weather.low}°</strong></div>
-            <div><Droplets size={15} /><span>YAĞIŞ</span><strong>%{weather.rain}</strong></div>
-            <div><Wind size={15} /><span>RÜZGÂR</span><strong>{weather.wind} km/sa</strong></div>
+            <div><span>FEELS LIKE</span><strong>{weather.feels}°</strong></div>
+            <div><span>HIGH / LOW</span><strong>{weather.high}° / {weather.low}°</strong></div>
+            <div><Droplets size={15} /><span>PRECIPITATION</span><strong>{weather.rain}%</strong></div>
+            <div><Wind size={15} /><span>WIND</span><strong>{weather.wind} km/h</strong></div>
           </div>
         </div>
       )}

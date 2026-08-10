@@ -116,7 +116,7 @@ export default function TaurusTicker() {
   }
 
   return (
-    <aside className={`taurusMarketTicker ${visible ? "is-visible" : ""}`} aria-label="Canlı piyasa bandı">
+    <aside className={`taurusMarketTicker ${visible ? "is-visible" : ""}`} aria-label="Live market ticker">
       <div className="taurusTickerLabel">MARKET</div>
       <div className="taurusTickerViewport">
         {groupItems.length ? (
@@ -125,10 +125,10 @@ export default function TaurusTicker() {
             {renderGroup(1)}
           </div>
         ) : (
-          <div className="taurusTickerEmpty">{loading ? "PİYASA BAĞLANTISI KURULUYOR" : "PİYASA VERİSİ ALINAMADI"}</div>
+          <div className="taurusTickerEmpty">{loading ? "CONNECTING TO MARKET DATA" : "MARKET DATA UNAVAILABLE"}</div>
         )}
       </div>
-      <div className="taurusTickerDelay">5 DK</div>
+      <div className="taurusTickerDelay">5 MIN</div>
     </aside>
   );
 }
