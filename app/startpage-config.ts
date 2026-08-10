@@ -12,7 +12,8 @@ export const defaultConfig: StartpageConfig = {
     { name: "omeryigitler.com", url: "https://omeryigitler.com", github: "https://github.com/omeryigitler/omeryigitler.com", status: "Aktif" },
     { name: "Built With Seyhan", url: "https://builtwithseyhan.com", status: "Aktif" },
     { name: "Berfin Akbaş", url: "https://berfinakbas.com", status: "Aktif" },
-    { name: "Dawl Studio", url: "https://dawlstudio.com", status: "Geliştiriliyor" }
+    { name: "Dawl Studio", url: "https://dawlstudio.com", status: "Geliştiriliyor" },
+    { name: "The History Archived", url: "https://start.omeryigitler.com/history", status: "Content Command Center" }
   ],
   folders: [
     { title: "Çalışma Araçları", subtitle: "Kod, yayın ve operasyon", links: [
