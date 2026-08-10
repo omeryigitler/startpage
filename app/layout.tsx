@@ -27,7 +27,7 @@ import { LOGO_IMAGE as HISTORY_LOGO_IMAGE } from "./history/assets";
 
 export const metadata: Metadata = {
   title: "Startpage — Ömer Yiğitler",
-  description: "Ömer Yiğitler için kişisel başlangıç sayfası",
+  description: "Ömer Yiğitler's personal command startpage",
   manifest: "/site.webmanifest",
   icons: {
     icon: [
@@ -54,7 +54,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   } as CSSProperties;
 
   return (
-    <html lang="tr" style={brandStyle}>
+    <html lang="en" style={brandStyle}>
       <body>
         {children}
         <TaurusTicker />
