@@ -2,7 +2,7 @@ import { neon } from "@neondatabase/serverless";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions, isAdminEmail } from "../../../lib/auth";
-import { defaultConfig, type StartpageConfig } from "../../startpage-config";
+import { defaultConfig, normalizeEnglishConfig, type StartpageConfig } from "../../startpage-config";
 
 export const dynamic = "force-dynamic";
 
@@ -24,13 +24,14 @@ function databaseUrl() {
 }
 
 function withHistoryProject(config: StartpageConfig): StartpageConfig {
-  const exists = config.projects.some(
+  const normalized = normalizeEnglishConfig(config);
+  const exists = normalized.projects.some(
     (project) =>
       project.url === HISTORY_PROJECT.url ||
-      project.name.toLocaleLowerCase("tr") === HISTORY_PROJECT.name.toLocaleLowerCase("tr"),
+      project.name.toLocaleLowerCase("en-US") === HISTORY_PROJECT.name.toLocaleLowerCase("en-US"),
   );
-  if (exists) return config;
-  return { ...config, projects: [...config.projects, HISTORY_PROJECT] };
+  if (exists) return normalized;
+  return { ...normalized, projects: [...normalized.projects, HISTORY_PROJECT] };
 }
 
 function validConfig(value: unknown): value is StartpageConfig {
@@ -112,7 +113,7 @@ export async function GET(request: Request) {
       setupRequired: true,
       isNew: false,
       hasStoredState: false,
-      error: "Kalıcı veri okunamadı.",
+      error: "Persistent data could not be read.",
     }, { status: 503, headers: { "Cache-Control": "no-store" } });
   }
 }
@@ -120,12 +121,12 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     if (!(await getAdminStatus())) {
-      return NextResponse.json({ error: "Yetkisiz erişim." }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized access." }, { status: 401 });
     }
 
     const state = await ensureState(true);
     if (!state?.row) {
-      return NextResponse.json({ error: "DATABASE_URL yapılandırılmamış." }, { status: 503 });
+      return NextResponse.json({ error: "DATABASE_URL is not configured." }, { status: 503 });
     }
 
     const body = await request.json() as { config?: unknown; note?: unknown };
@@ -133,10 +134,10 @@ export async function PUT(request: Request) {
     const nextNote = body.note === undefined ? state.row.note : body.note;
 
     if (!validConfig(requestedConfig)) {
-      return NextResponse.json({ error: "Geçersiz yapılandırma." }, { status: 400 });
+      return NextResponse.json({ error: "Invalid configuration." }, { status: 400 });
     }
     if (typeof nextNote !== "string") {
-      return NextResponse.json({ error: "Geçersiz not." }, { status: 400 });
+      return NextResponse.json({ error: "Invalid note." }, { status: 400 });
     }
 
     const nextConfig = withHistoryProject(requestedConfig);
@@ -157,6 +158,6 @@ export async function PUT(request: Request) {
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("State PUT failed", error);
-    return NextResponse.json({ error: "Kalıcı kayıt başarısız." }, { status: 500 });
+    return NextResponse.json({ error: "Persistent save failed." }, { status: 500 });
   }
 }
