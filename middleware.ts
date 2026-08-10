@@ -4,6 +4,7 @@ import { GATEWAY_SESSION_COOKIE, verifyGatewaySession } from "./lib/gateway-sess
 const PUBLIC_PATH_PREFIXES = [
   "/api/auth",
   "/api/gateway/session",
+  "/api/history-brand",
   "/_next",
 ];
 
