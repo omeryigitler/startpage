@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./history.css";
 import "./page-width-fix.css";
 import "./workflow.css";
+import "./history-ux.css";
+import HistoryUx from "./HistoryUx";
 
 export const metadata: Metadata = {
   title: "The History Archived — Content Command Center",
@@ -19,5 +21,5 @@ export const metadata: Metadata = {
 };
 
 export default function HistoryLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return children;
+  return <HistoryUx>{children}</HistoryUx>;
 }
