@@ -6,6 +6,7 @@ import {
   type HistorySettings,
   type HistorySource,
   type HistoryTask,
+  type HistoryWorkflowStep,
   type PromptAsset,
   type Video,
   type WorkflowEvent,
@@ -140,10 +141,22 @@ export async function ensureHistorySchema() {
       youtube_channel_url TEXT NOT NULL DEFAULT '',
       timezone TEXT NOT NULL DEFAULT 'Europe/Malta',
       default_format TEXT NOT NULL DEFAULT 'Long Documentary',
+      ai_master_instructions TEXT NOT NULL DEFAULT '',
+      workflow JSONB NOT NULL DEFAULT '[]'::jsonb,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )`;
+    await sql`ALTER TABLE history_settings ADD COLUMN IF NOT EXISTS ai_master_instructions TEXT NOT NULL DEFAULT ''`;
+    await sql`ALTER TABLE history_settings ADD COLUMN IF NOT EXISTS workflow JSONB NOT NULL DEFAULT '[]'::jsonb`;
     await sql`INSERT INTO history_settings (id) VALUES ('main') ON CONFLICT (id) DO NOTHING`;
+    await sql.query(
+      `UPDATE history_settings SET ai_master_instructions = $2 WHERE id = $1 AND COALESCE(ai_master_instructions, '') = ''`,
+      ["main", DEFAULT_HISTORY_SETTINGS.aiMasterInstructions],
+    );
+    await sql.query(
+      `UPDATE history_settings SET workflow = $2::jsonb WHERE id = $1 AND (workflow IS NULL OR jsonb_typeof(workflow) <> 'array' OR jsonb_array_length(workflow) = 0)`,
+      ["main", JSON.stringify(DEFAULT_HISTORY_SETTINGS.workflow)],
+    );
     await sql`DROP TABLE IF EXISTS history_workspace_state`;
   })().catch((error) => {
     schemaReady = null;
@@ -259,6 +272,10 @@ export function mapHistoryEvent(row: any): WorkflowEvent {
   return { id: row.id, videoId: row.video_id, fromStatus: row.from_status || "", toStatus: row.to_status || "", createdAt: row.created_at };
 }
 
+function validWorkflow(value: unknown): value is HistoryWorkflowStep[] {
+  return Array.isArray(value) && value.length > 0 && value.every((step) => step && typeof step === "object" && typeof (step as HistoryWorkflowStep).name === "string");
+}
+
 export function mapHistorySettings(row: any): HistorySettings {
   if (!row) return DEFAULT_HISTORY_SETTINGS;
   return {
@@ -266,5 +283,7 @@ export function mapHistorySettings(row: any): HistorySettings {
     youtubeChannelUrl: row.youtube_channel_url || "",
     timezone: row.timezone || DEFAULT_HISTORY_SETTINGS.timezone,
     defaultFormat: row.default_format || DEFAULT_HISTORY_SETTINGS.defaultFormat,
+    aiMasterInstructions: row.ai_master_instructions || DEFAULT_HISTORY_SETTINGS.aiMasterInstructions,
+    workflow: validWorkflow(row.workflow) ? row.workflow : DEFAULT_HISTORY_SETTINGS.workflow,
   };
 }
