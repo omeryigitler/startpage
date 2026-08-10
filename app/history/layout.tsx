@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./history.css";
+import "./page-width-fix.css";
 
 export const metadata: Metadata = {
   title: "The History Archived — Content Command Center",
