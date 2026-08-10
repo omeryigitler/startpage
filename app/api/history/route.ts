@@ -5,10 +5,10 @@ import { GATEWAY_SESSION_COOKIE, verifyGatewaySession } from "../../../lib/gatew
 import {
   DEFAULT_HISTORY_SETTINGS,
   EMPTY_VIDEO_FIELDS,
-  HISTORY_STATUSES,
   getYouTubeVideoId,
   type HistoryBootstrap,
   type HistorySettings,
+  type HistoryWorkflowStep,
   type Video,
 } from "../../../lib/history-model";
 import {
@@ -28,7 +28,6 @@ export const dynamic = "force-dynamic";
 const FORMAT_VALUES = new Set(["Long Documentary", "Short", "Special"]);
 const PRIORITY_VALUES = new Set(["P1", "P2", "P3", "P4"]);
 const TASK_STATUS_VALUES = new Set(["To Do", "Doing", "Blocked", "Review", "Done"]);
-const STATUS_VALUES = new Set(HISTORY_STATUSES);
 
 function json(data: unknown, status = 200, extraHeaders?: HeadersInit) {
   return NextResponse.json(data, {
@@ -72,6 +71,44 @@ function rating(value: unknown) {
 function numberScore(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
+}
+
+function progressValue(value: unknown) {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.max(0, Math.min(100, Math.round(n))) : 0;
+}
+
+function cleanWorkflow(value: unknown): HistoryWorkflowStep[] {
+  if (!Array.isArray(value)) return [];
+  const names = new Set<string>();
+  const steps: HistoryWorkflowStep[] = [];
+  for (const raw of value.slice(0, 60)) {
+    if (!raw || typeof raw !== "object") continue;
+    const item = raw as Record<string, unknown>;
+    const name = cleanString(item.name, 120);
+    if (!name) continue;
+    const key = name.toLocaleLowerCase("en-US");
+    if (names.has(key)) continue;
+    names.add(key);
+    steps.push({
+      id: cleanString(item.id, 120) || randomUUID(),
+      name,
+      phase: cleanString(item.phase, 120),
+      objective: cleanString(item.objective, 4000),
+      instructions: cleanString(item.instructions, 10000),
+      deliverables: cleanString(item.deliverables, 10000),
+      completionCriteria: cleanString(item.completionCriteria, 10000),
+      aiPrompt: cleanString(item.aiPrompt, 12000),
+      progress: progressValue(item.progress),
+      required: item.required !== false,
+    });
+  }
+  return steps;
+}
+
+function storedWorkflow(value: unknown) {
+  const workflow = cleanWorkflow(value);
+  return workflow.length ? workflow : DEFAULT_HISTORY_SETTINGS.workflow;
 }
 
 async function bootstrap(): Promise<HistoryBootstrap> {
@@ -137,22 +174,25 @@ export async function POST(request: Request) {
     if (resource === "videos") {
       const sequence = await sql.query(`SELECT nextval('history_video_public_id_seq') AS n`);
       const id = `THA-${String(Number(sequence[0]?.n || 1)).padStart(3, "0")}`;
-      const settingsRows = await sql.query(`SELECT default_format FROM history_settings WHERE id = 'main' LIMIT 1`);
+      const settingsRows = await sql.query(`SELECT default_format, workflow FROM history_settings WHERE id = 'main' LIMIT 1`);
       const requestedFormat = cleanString(body.format, 40);
       const format = FORMAT_VALUES.has(requestedFormat)
         ? requestedFormat
         : FORMAT_VALUES.has(settingsRows[0]?.default_format)
           ? settingsRows[0].default_format
           : DEFAULT_HISTORY_SETTINGS.defaultFormat;
+      const workflow = storedWorkflow(settingsRows[0]?.workflow);
+      const initialStatus = workflow[0]?.name || "Idea";
       const rows = await sql.query(
         `INSERT INTO history_videos (
-          id, working_title, format, content_score, checklist, legal, packaging, dates, idea_bank, production, analytics
-        ) VALUES ($1,$2,$3,$4::jsonb,$5::jsonb,$6::jsonb,$7::jsonb,$8::jsonb,$9::jsonb,$10::jsonb,$11::jsonb)
+          id, working_title, format, status, content_score, checklist, legal, packaging, dates, idea_bank, production, analytics
+        ) VALUES ($1,$2,$3,$4,$5::jsonb,$6::jsonb,$7::jsonb,$8::jsonb,$9::jsonb,$10::jsonb,$11::jsonb,$12::jsonb)
         RETURNING *`,
         [
           id,
           cleanString(body.workingTitle, 300),
           format,
+          initialStatus,
           JSON.stringify(EMPTY_VIDEO_FIELDS.contentScore),
           JSON.stringify(EMPTY_VIDEO_FIELDS.checklist),
           JSON.stringify(EMPTY_VIDEO_FIELDS.legal),
@@ -165,7 +205,7 @@ export async function POST(request: Request) {
       );
       await sql.query(
         `INSERT INTO history_workflow_events (id, video_id, from_status, to_status) VALUES ($1,$2,$3,$4)`,
-        [randomUUID(), id, null, "Idea"],
+        [randomUUID(), id, null, initialStatus],
       );
       return json(mapHistoryVideo(rows[0]), 201);
     }
@@ -260,7 +300,11 @@ export async function PATCH(request: Request) {
       if (!id) return json({ error: "Video id is required." }, 400);
       const current = await sql.query(`SELECT status FROM history_videos WHERE id = $1 LIMIT 1`, [id]);
       if (!current[0]) return json({ error: "Video not found." }, 404);
-      const status = STATUS_VALUES.has(body.status) ? body.status : current[0].status;
+      const workflowRows = await sql.query(`SELECT workflow FROM history_settings WHERE id = 'main' LIMIT 1`);
+      const workflow = storedWorkflow(workflowRows[0]?.workflow);
+      const statusValues = new Set(workflow.map((step) => step.name));
+      const requestedStatus = cleanString(body.status, 120);
+      const status = statusValues.has(requestedStatus) ? requestedStatus : current[0].status;
       const youtubeUrl = cleanString(body.youtubeUrl, 2000);
       if (status === "Published" && !getYouTubeVideoId(youtubeUrl)) {
         return json({ error: "A valid YouTube video URL is required before marking a video Published." }, 400);
@@ -386,9 +430,31 @@ export async function PATCH(request: Request) {
     if (resource === "settings") {
       const requested = body as Partial<HistorySettings>;
       const format = FORMAT_VALUES.has(requested.defaultFormat || "") ? requested.defaultFormat : DEFAULT_HISTORY_SETTINGS.defaultFormat;
+      const workflow = cleanWorkflow(requested.workflow);
+      if (!workflow.length) return json({ error: "Workflow must contain at least one stage." }, 400);
+      const requestedNames = Array.isArray(requested.workflow)
+        ? requested.workflow.map((item: any) => cleanString(item?.name, 120)).filter(Boolean)
+        : [];
+      if (new Set(requestedNames.map((name) => name.toLocaleLowerCase("en-US"))).size !== requestedNames.length) {
+        return json({ error: "Workflow stage names must be unique." }, 400);
+      }
+      const usedStatuses = await sql.query(`SELECT DISTINCT status FROM history_videos WHERE status IS NOT NULL AND status <> ''`);
+      const names = new Set(workflow.map((step) => step.name));
+      const missing = usedStatuses.map((row) => row.status).filter((status) => !names.has(status));
+      if (missing.length) {
+        return json({ error: `Move videos out of these stages before removing or renaming them: ${missing.join(", ")}.` }, 409);
+      }
       const rows = await sql.query(
-        `UPDATE history_settings SET channel_name=$2,youtube_channel_url=$3,timezone=$4,default_format=$5,updated_at=NOW() WHERE id=$1 RETURNING *`,
-        ["main", cleanString(requested.channelName, 300) || DEFAULT_HISTORY_SETTINGS.channelName, cleanString(requested.youtubeChannelUrl, 2000), cleanString(requested.timezone, 100) || "Europe/Malta", format],
+        `UPDATE history_settings SET channel_name=$2,youtube_channel_url=$3,timezone=$4,default_format=$5,ai_master_instructions=$6,workflow=$7::jsonb,updated_at=NOW() WHERE id=$1 RETURNING *`,
+        [
+          "main",
+          cleanString(requested.channelName, 300) || DEFAULT_HISTORY_SETTINGS.channelName,
+          cleanString(requested.youtubeChannelUrl, 2000),
+          cleanString(requested.timezone, 100) || "Europe/Malta",
+          format,
+          cleanString(requested.aiMasterInstructions, 20000) || DEFAULT_HISTORY_SETTINGS.aiMasterInstructions,
+          JSON.stringify(workflow),
+        ],
       );
       return json(mapHistorySettings(rows[0]));
     }
