@@ -35,6 +35,10 @@ function selectedLabel(select: HTMLSelectElement) {
   return select.selectedOptions[0]?.textContent?.trim() || select.value || "Select";
 }
 
+function setAttributeIfChanged(element: HTMLElement, name: string, value: string) {
+  if (element.getAttribute(name) !== value) element.setAttribute(name, value);
+}
+
 function dialogMeta(dialog: DialogState) {
   const lower = dialog.message.toLocaleLowerCase("en-US");
   if (dialog.kind === "alert") {
@@ -59,16 +63,19 @@ export default function HistoryUx({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const records = new Map<HTMLSelectElement, EnhancedSelect>();
     let activeClickTarget: HTMLElement | null = null;
+    let scanQueued = false;
 
     const syncSelect = (select: HTMLSelectElement, button: HTMLButtonElement) => {
-      button.textContent = selectedLabel(select);
-      button.disabled = select.disabled;
-      button.setAttribute("aria-disabled", select.disabled ? "true" : "false");
-      button.setAttribute("aria-label", select.getAttribute("aria-label") || selectedLabel(select));
+      const label = selectedLabel(select);
+      if (button.textContent !== label) button.textContent = label;
+      if (button.disabled !== select.disabled) button.disabled = select.disabled;
+      setAttributeIfChanged(button, "aria-disabled", select.disabled ? "true" : "false");
+      setAttributeIfChanged(button, "aria-label", select.getAttribute("aria-label") || label);
     };
 
     const openSelect = (select: HTMLSelectElement, button: HTMLButtonElement) => {
       if (select.disabled) return;
+      syncSelect(select, button);
       const rect = button.getBoundingClientRect();
       const options = Array.from(select.options).map((option) => ({
         value: option.value,
@@ -83,7 +90,7 @@ export default function HistoryUx({ children }: { children: React.ReactNode }) {
       const top = placeAbove ? Math.max(8, rect.top - maxHeight - 6) : Math.min(window.innerHeight - maxHeight - 8, rect.bottom + 6);
       const left = Math.min(Math.max(8, rect.left), Math.max(8, window.innerWidth - rect.width - 8));
 
-      button.setAttribute("aria-expanded", "true");
+      setAttributeIfChanged(button, "aria-expanded", "true");
       setSelectMenu({ select, trigger: button, options, left, top, width: rect.width, maxHeight });
     };
 
@@ -115,24 +122,40 @@ export default function HistoryUx({ children }: { children: React.ReactNode }) {
       records.set(select, { button, onClick, onChange });
     };
 
-    const scan = () => {
-      document.querySelectorAll<HTMLSelectElement>("select").forEach(enhance);
+    const cleanDisconnected = () => {
       for (const [select, record] of records) {
-        if (!select.isConnected) {
-          record.button.removeEventListener("click", record.onClick);
-          select.removeEventListener("change", record.onChange);
-          record.button.remove();
-          records.delete(select);
-          continue;
-        }
-        syncSelect(select, record.button);
+        if (select.isConnected) continue;
+        record.button.removeEventListener("click", record.onClick);
+        select.removeEventListener("change", record.onChange);
+        record.button.remove();
+        records.delete(select);
       }
     };
 
+    const scan = () => {
+      scanQueued = false;
+      const root = document.querySelector<HTMLElement>(".thaShell") || document.body;
+      root.querySelectorAll<HTMLSelectElement>("select:not(.thaNativeSelectHidden)").forEach(enhance);
+      cleanDisconnected();
+    };
+
+    const queueScan = () => {
+      if (scanQueued) return;
+      scanQueued = true;
+      window.requestAnimationFrame(scan);
+    };
+
     scan();
-    const observer = new MutationObserver(scan);
-    observer.observe(document.body, { childList: true, subtree: true });
-    const syncTimer = window.setInterval(scan, 350);
+    const observedRoot = document.querySelector<HTMLElement>(".thaShell") || document.body;
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.addedNodes.length || mutation.removedNodes.length) {
+          queueScan();
+          break;
+        }
+      }
+    });
+    observer.observe(observedRoot, { childList: true, subtree: true });
 
     const nativeAlert = window.alert.bind(window);
     const nativeConfirm = window.confirm.bind(window);
@@ -163,7 +186,7 @@ export default function HistoryUx({ children }: { children: React.ReactNode }) {
 
     const closeFloating = () => {
       setSelectMenu((current) => {
-        current?.trigger.setAttribute("aria-expanded", "false");
+        if (current) current.trigger.setAttribute("aria-expanded", "false");
         return null;
       });
     };
@@ -172,7 +195,6 @@ export default function HistoryUx({ children }: { children: React.ReactNode }) {
 
     return () => {
       observer.disconnect();
-      window.clearInterval(syncTimer);
       document.removeEventListener("click", captureClick, true);
       window.removeEventListener("resize", closeFloating);
       window.removeEventListener("scroll", closeFloating, true);
@@ -213,7 +235,8 @@ export default function HistoryUx({ children }: { children: React.ReactNode }) {
     const descriptor = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value");
     descriptor?.set?.call(selectMenu.select, value);
     selectMenu.select.dispatchEvent(new Event("change", { bubbles: true }));
-    selectMenu.trigger.textContent = selectedLabel(selectMenu.select);
+    const label = selectedLabel(selectMenu.select);
+    if (selectMenu.trigger.textContent !== label) selectMenu.trigger.textContent = label;
     closeSelect();
   }
 
