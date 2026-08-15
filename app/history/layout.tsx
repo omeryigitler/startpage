@@ -3,6 +3,7 @@ import "./history.css";
 import "./page-width-fix.css";
 import "./workflow.css";
 import "./history-ux.css";
+import "./brand-refresh.css";
 import HistoryUx from "./HistoryUx";
 
 export const metadata: Metadata = {
