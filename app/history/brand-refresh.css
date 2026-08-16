@@ -1,18 +1,16 @@
-/* Canonical The History Archived brand refresh. */
+/* Canonical The History Archived brand assets. */
 .thaBrand img,
 .thaMobileBar img{
   border-radius:50%;
-  background:#050505;
-  object-fit:cover;
+  background:transparent;
+  object-fit:contain;
   object-position:center;
 }
 
-/* Dashboard banner artwork stays unchanged; the current canonical medallion is layered over the legacy mark. */
 .thaBanner{
-  content:url("/api/history-banner")!important;
   width:100%!important;
   height:auto!important;
-  aspect-ratio:2560 / 423;
+  aspect-ratio:auto!important;
   display:block;
   object-fit:contain!important;
   object-position:center!important;
@@ -20,26 +18,12 @@
   box-shadow:none!important;
 }
 
-.thaBannerLogoOverlay{
-  position:fixed;
-  z-index:5;
-  transform:translate(-50%,-50%);
-  border-radius:50%;
-  clip-path:circle(49.2% at 50% 50%);
-  object-fit:cover;
-  object-position:center;
-  background:#050505;
-  pointer-events:none;
-  user-select:none;
-  box-shadow:0 8px 28px rgba(0,0,0,.72);
-}
-
 .thaBrandCard>img:first-child{
-  content:url("/api/history-logo")!important;
-  object-fit:cover!important;
+  content:url("/api/history-logo?v=20260816-2")!important;
+  object-fit:contain!important;
   object-position:center!important;
   border-radius:50%;
-  background:#050505!important;
+  background:transparent!important;
 }
 
 @media(max-width:760px){

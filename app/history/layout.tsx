@@ -5,7 +5,6 @@ import "./workflow.css";
 import "./history-ux.css";
 import "./brand-refresh.css";
 import HistoryUx from "./HistoryUx";
-import HistoryBrandSync from "./HistoryBrandSync";
 
 export const metadata: Metadata = {
   title: "The History Archived — Content Command Center",
@@ -23,10 +22,5 @@ export const metadata: Metadata = {
 };
 
 export default function HistoryLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <HistoryUx>
-      {children}
-      <HistoryBrandSync />
-    </HistoryUx>
-  );
+  return <HistoryUx>{children}</HistoryUx>;
 }

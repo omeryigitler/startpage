@@ -13,7 +13,7 @@ export function GET() {
     headers: {
       "Content-Type": "image/webp",
       "Content-Length": String(BANNER.byteLength),
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800",
     },
   });
 }
