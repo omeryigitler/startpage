@@ -5,6 +5,7 @@ const PUBLIC_PATH_PREFIXES = [
   "/api/auth",
   "/api/gateway/session",
   "/api/history-banner",
+  "/api/history-logo",
   "/_next",
 ];
 

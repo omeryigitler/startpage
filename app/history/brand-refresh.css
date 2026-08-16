@@ -1,13 +1,13 @@
-/* Canonical The History Archived brand refresh.
-   The supplied THA medallion remains the single logo source of truth. */
+/* Canonical The History Archived brand refresh. */
 .thaBrand img,
 .thaMobileBar img{
   border-radius:50%;
   background:#050505;
+  object-fit:cover;
+  object-position:center;
 }
 
-/* Dashboard banner: use the same finished raster artwork as the YouTube banner.
-   Never redraw, crop, stretch or re-typeset it in the app. */
+/* Dashboard banner artwork stays unchanged; the current canonical medallion is layered over the legacy mark. */
 .thaBanner{
   content:url("/api/history-banner")!important;
   width:100%!important;
@@ -20,12 +20,26 @@
   box-shadow:none!important;
 }
 
+.thaBannerLogoOverlay{
+  position:fixed;
+  z-index:5;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  clip-path:circle(49.2% at 50% 50%);
+  object-fit:cover;
+  object-position:center;
+  background:#050505;
+  pointer-events:none;
+  user-select:none;
+  box-shadow:0 8px 28px rgba(0,0,0,.72);
+}
+
 .thaBrandCard>img:first-child{
-  object-fit:contain!important;
+  content:url("/api/history-logo")!important;
+  object-fit:cover!important;
   object-position:center!important;
-  background:
-    radial-gradient(circle at 50% 50%,rgba(185,115,28,.14),transparent 30%),
-    #050505!important;
+  border-radius:50%;
+  background:#050505!important;
 }
 
 @media(max-width:760px){

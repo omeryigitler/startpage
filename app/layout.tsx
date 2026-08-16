@@ -23,7 +23,6 @@ import "./history-entry.css";
 import TaurusTicker from "./TaurusTicker";
 import TaurusCommandBridge from "./TaurusCommandBridge";
 import TaurusCommandEnhancements from "./TaurusCommandEnhancements";
-import { LOGO_IMAGE as HISTORY_LOGO_IMAGE } from "./history/assets";
 
 export const metadata: Metadata = {
   title: "Startpage — Ömer Yiğitler",
@@ -50,7 +49,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const brandStyle = {
-    "--history-project-logo": `url("${HISTORY_LOGO_IMAGE}")`,
+    "--history-project-logo": 'url("/api/history-logo")',
   } as CSSProperties;
 
   return (
