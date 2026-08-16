@@ -1,21 +1,23 @@
 /* Canonical The History Archived brand refresh.
-   The supplied THA medallion is the single visual source of truth across the workspace. */
+   The supplied THA medallion remains the single logo source of truth. */
 .thaBrand img,
 .thaMobileBar img{
   border-radius:50%;
   background:#050505;
 }
 
-/* Dashboard hero: served as a code-generated SVG so the branding stays sharp at any size.
-   `content` replaces the legacy data-URI banner on the existing <img> without changing page layout. */
+/* Dashboard banner: use the same finished raster artwork as the YouTube banner.
+   Never redraw, crop, stretch or re-typeset it in the app. */
 .thaBanner{
   content:url("/api/history-banner")!important;
-  object-fit:cover!important;
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:2560 / 423;
+  display:block;
+  object-fit:contain!important;
   object-position:center!important;
-  background:#080604!important;
-  box-shadow:
-    inset 0 0 70px rgba(0,0,0,.52),
-    0 10px 35px rgba(0,0,0,.18);
+  background:#080808!important;
+  box-shadow:none!important;
 }
 
 .thaBrandCard>img:first-child{
@@ -27,5 +29,5 @@
 }
 
 @media(max-width:760px){
-  .thaBanner{height:160px!important}
+  .thaBanner{height:auto!important}
 }
