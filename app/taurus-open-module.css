@@ -1,17 +1,24 @@
 /* Open modules need more room than their compact covers. Imported last. */
 
-/* Keep link logos as fixed, substantial squares instead of letting the grid compress them. */
+/* Open cards should use regular rounded corners; the compact cards keep the Taurus chamfer. */
+.taurusStartpage .folderFrame.folder-is-open .activeFolderCard {
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  border-radius: 18px !important;
+}
+
+/* Keep link logos visually substantial instead of leaving a small favicon inside a thin square. */
 .taurusStartpage .folderFrame.folder-is-open .folderLinkGrid .taurusLinkIcon {
-  width: 44px !important;
-  height: 44px !important;
-  min-width: 44px !important;
-  min-height: 44px !important;
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
   box-sizing: border-box;
 }
 
 .taurusStartpage .folderFrame.folder-is-open .folderLinkGrid .taurusLinkIcon img {
-  width: 24px !important;
-  height: 24px !important;
+  width: 30px !important;
+  height: 30px !important;
 }
 
 @media (min-width: 981px) {
