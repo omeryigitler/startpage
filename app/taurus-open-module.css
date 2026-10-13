@@ -7,18 +7,26 @@
   border-radius: 18px !important;
 }
 
-/* Keep link logos visually substantial instead of leaving a small favicon inside a thin square. */
+/* Keep only the actual brand mark in link rows; remove the extra framed icon box. */
 .taurusStartpage .folderFrame.folder-is-open .folderLinkGrid .taurusLinkIcon {
-  width: 48px !important;
-  height: 48px !important;
-  min-width: 48px !important;
-  min-height: 48px !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  display: grid !important;
+  place-items: center !important;
   box-sizing: border-box;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
 }
 
 .taurusStartpage .folderFrame.folder-is-open .folderLinkGrid .taurusLinkIcon img {
-  width: 30px !important;
-  height: 30px !important;
+  width: 34px !important;
+  height: 34px !important;
+  object-fit: contain !important;
 }
 
 @media (min-width: 981px) {
@@ -112,7 +120,44 @@
     min-height: 360px !important;
   }
 
+  .taurusStartpage .folderFrame.folder-is-open .activeFolderHeader {
+    position: relative !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    padding: 16px 14px 16px 16px !important;
+    gap: 10px !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .activeFolderMark {
+    display: none !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .closeFolderButton {
+    position: relative !important;
+    z-index: 30 !important;
+    grid-column: 2 !important;
+    justify-self: end !important;
+    align-self: start !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+  }
+
   .taurusStartpage .folderFrame.folder-is-open .activeFolderContent {
     padding: 12px !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .folderLinkGrid .taurusLinkIcon {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+  }
+
+  .taurusStartpage .folderFrame.folder-is-open .folderLinkGrid .taurusLinkIcon img {
+    width: 32px !important;
+    height: 32px !important;
   }
 }
