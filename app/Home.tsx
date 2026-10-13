@@ -20,6 +20,7 @@ import {
   MessagesSquare,
   NotebookPen,
   Palette,
+  Power,
   Radar,
   Search,
   Settings2,
@@ -34,6 +35,7 @@ import { defaultConfig, normalizeEnglishConfig, StartpageConfig } from "./startp
 import NotesModal from "./NotesModal";
 
 const STORAGE_KEY = "startpage-config-v1";
+const IDLE_TIMEOUT_MS = 120_000;
 
 type WeatherData = {
   temp: number;
@@ -125,6 +127,7 @@ export default function Home() {
   const [openFolderId, setOpenFolderId] = useState<string | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const wheelLockRef = useRef(0);
+  const idleTimerRef = useRef<number | null>(null);
 
   const greeting = config.greeting?.trim() || greetingForHour(now.getHours());
   const date = useMemo(
@@ -180,6 +183,19 @@ export default function Home() {
     setLaunched(true);
     setWorkspaceOpen(true);
     window.setTimeout(() => searchRef.current?.focus(), 650);
+  }
+
+  function enterStandby() {
+    if (idleTimerRef.current !== null) {
+      window.clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = null;
+    }
+    setOpenFolderId(null);
+    setNotesOpen(false);
+    setQuery("");
+    setWorkspaceOpen(false);
+    setLaunched(false);
+    searchRef.current?.blur();
   }
 
   function paginate(nextDirection: number) {
@@ -285,6 +301,40 @@ export default function Home() {
       window.removeEventListener("keydown", onKey);
     };
   }, [workspaceOpen, slides.length, openFolderId]);
+
+  useEffect(() => {
+    if (!launched) {
+      if (idleTimerRef.current !== null) {
+        window.clearTimeout(idleTimerRef.current);
+        idleTimerRef.current = null;
+      }
+      return;
+    }
+
+    const resetIdleTimer = () => {
+      if (idleTimerRef.current !== null) window.clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = window.setTimeout(enterStandby, IDLE_TIMEOUT_MS);
+    };
+
+    resetIdleTimer();
+    window.addEventListener("pointermove", resetIdleTimer, { passive: true });
+    window.addEventListener("pointerdown", resetIdleTimer, { passive: true });
+    window.addEventListener("keydown", resetIdleTimer);
+    window.addEventListener("touchstart", resetIdleTimer, { passive: true });
+    window.addEventListener("wheel", resetIdleTimer, { passive: true });
+
+    return () => {
+      if (idleTimerRef.current !== null) {
+        window.clearTimeout(idleTimerRef.current);
+        idleTimerRef.current = null;
+      }
+      window.removeEventListener("pointermove", resetIdleTimer);
+      window.removeEventListener("pointerdown", resetIdleTimer);
+      window.removeEventListener("keydown", resetIdleTimer);
+      window.removeEventListener("touchstart", resetIdleTimer);
+      window.removeEventListener("wheel", resetIdleTimer);
+    };
+  }, [launched]);
 
   useEffect(() => {
     let cancelled = false;
@@ -485,9 +535,14 @@ export default function Home() {
             onChange={(event) => setQuery(event.target.value)}
             placeholder="GLOBAL COMMAND..."
           />
-          <button type="button" onClick={launchAndFocus} aria-label="Focus search">
-            <Command size={13} /> K <span>/</span>
-          </button>
+          <div className="centerSearchActions">
+            <button type="button" className="standbyButton" onClick={enterStandby} aria-label="Enter standby" title="Standby">
+              <Power size={15} />
+            </button>
+            <button type="button" className="commandHintButton" onClick={launchAndFocus} aria-label="Focus search">
+              <Command size={13} /> K <span>/</span>
+            </button>
+          </div>
         </form>
         <p className="centerGreeting"><Sparkles size={14} /><span>$</span> {greeting}</p>
         {query && (
