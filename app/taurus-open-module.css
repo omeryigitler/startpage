@@ -1,7 +1,9 @@
 /* Open modules need more room than their compact covers. Imported last. */
 
-/* Open cards should use regular rounded corners; the compact cards keep the Taurus chamfer. */
-.taurusStartpage .folderFrame.folder-is-open .activeFolderCard {
+/* Remove the Taurus chamfer everywhere: closed centre card, open card and side cards. */
+.taurusStartpage .centerFolderCover,
+.taurusStartpage .activeFolderCard,
+.taurusStartpage .sideFolder {
   clip-path: none !important;
   -webkit-clip-path: none !important;
   border-radius: 18px !important;
@@ -104,6 +106,12 @@
 }
 
 @media (max-width: 680px) {
+  .taurusStartpage .centerFolderCover,
+  .taurusStartpage .activeFolderCard,
+  .taurusStartpage .sideFolder {
+    border-radius: 16px !important;
+  }
+
   .taurusStartpage .folderWorkspace:has(.folderFrame.folder-is-open) {
     top: 56% !important;
     height: min(70vh, 540px) !important;
