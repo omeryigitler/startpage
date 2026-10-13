@@ -1,9 +1,31 @@
-/* Manual standby control in the command bar. */
+/* Manual standby control and command-bar balance. */
 .taurusStartpage .centerSearchActions{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
   display:flex;
   align-items:center;
   justify-content:flex-end;
   gap:8px;
+  z-index:4;
+}
+
+/* Keep the left search area from running underneath the centered Taurus logo. */
+.taurusStartpage .centerSearchForm input{
+  width:calc(50% - 58px) !important;
+  justify-self:start;
+}
+
+/* The logo and search shell share the exact same center axis. */
+.taurusStartpage .searchExpansion,
+.taurusStartpage .centerLogoDock{
+  left:50% !important;
+}
+
+/* Greeting under the command bar is intentionally removed. */
+.taurusStartpage .centerGreeting{
+  display:none !important;
 }
 
 .taurusStartpage .centerSearchForm .standbyButton{
@@ -34,14 +56,23 @@
 }
 
 @media(max-width:620px){
-  .taurusStartpage .centerSearchActions{gap:6px}
+  /* Manual standby stays desktop-only; mobile keeps the command bar uncluttered. */
   .taurusStartpage .centerSearchForm .standbyButton{
-    width:36px;
-    min-width:36px;
-    height:36px;
+    display:none !important;
   }
+
+  .taurusStartpage .centerSearchActions{
+    right:8px;
+    gap:0;
+  }
+
   .taurusStartpage .centerSearchForm .commandHintButton{
     min-width:54px;
     padding:0 9px;
+  }
+
+  /* Give mobile search the available space once the power button is gone. */
+  .taurusStartpage .centerSearchForm input{
+    width:calc(100% - 72px) !important;
   }
 }
