@@ -1,0 +1,72 @@
+/* Notes attachment upload: one clear centered action instead of a separate heading + button. */
+.noteAttachments{
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+}
+
+.noteAttachments .attachmentGrid{
+  max-height:220px!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+  padding:0!important;
+  overflow:auto!important;
+}
+
+.attachmentAddTile{
+  grid-column:1/-1!important;
+  min-height:92px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:9px!important;
+  border:1px dashed rgba(255,215,0,.26)!important;
+  border-radius:13px!important;
+  background:rgba(255,215,0,.012)!important;
+  color:#cfcfc7!important;
+  cursor:pointer!important;
+  font-family:var(--taurus-body,"Manrope",system-ui,sans-serif)!important;
+  font-size:13px!important;
+  font-weight:700!important;
+  transition:border-color .2s ease,background .2s ease,color .2s ease,transform .2s ease!important;
+}
+
+.attachmentAddTile svg{
+  color:#FFD700!important;
+}
+
+.attachmentAddTile input{
+  display:none!important;
+}
+
+.attachmentAddTile:hover,
+.attachmentAddTile:focus-within{
+  transform:translateY(-1px)!important;
+  border-color:rgba(255,215,0,.52)!important;
+  background:rgba(255,215,0,.045)!important;
+  color:#fff!important;
+}
+
+.attachmentAddTile.compact{
+  min-height:48px!important;
+  border-style:solid!important;
+  border-color:rgba(255,215,0,.16)!important;
+  background:rgba(255,255,255,.018)!important;
+  font-size:12px!important;
+}
+
+.attachmentAddTile.compact:hover{
+  border-color:rgba(255,215,0,.42)!important;
+  background:rgba(255,215,0,.04)!important;
+}
+
+@media(max-width:700px){
+  .noteAttachments .attachmentGrid{
+    grid-template-columns:1fr!important;
+  }
+
+  .attachmentAddTile{
+    min-height:84px!important;
+    font-size:13px!important;
+  }
+}
