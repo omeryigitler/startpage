@@ -41,21 +41,20 @@
   box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
 }
 
-.notesFooter button{
-  flex:0 0 auto!important;
-  width:40px!important;
-  min-width:40px!important;
-  height:40px!important;
-  min-height:40px!important;
-  margin:0!important;
-  padding:0!important;
-}
-
+/* Delete and Save share exactly the same circular geometry. */
+.notesFooter button,
 .notesFooter .saveNoteButton{
+  flex:0 0 42px!important;
   width:42px!important;
   min-width:42px!important;
+  max-width:42px!important;
   height:42px!important;
   min-height:42px!important;
+  max-height:42px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:50%!important;
+  aspect-ratio:1 / 1!important;
 }
 
 @media(max-width:700px){
@@ -82,18 +81,15 @@
     gap:8px!important;
   }
 
-  .notesFooter button{
-    width:42px!important;
-    min-width:42px!important;
-    height:42px!important;
-    min-height:42px!important;
-  }
-
+  .notesFooter button,
   .notesFooter .saveNoteButton{
+    flex-basis:44px!important;
     width:44px!important;
     min-width:44px!important;
+    max-width:44px!important;
     height:44px!important;
     min-height:44px!important;
+    max-height:44px!important;
   }
 }
 
@@ -120,17 +116,14 @@
     padding:9px 8px 7px!important;
   }
 
-  .notesFooter button{
+  .notesFooter button,
+  .notesFooter .saveNoteButton{
+    flex-basis:40px!important;
     width:40px!important;
     min-width:40px!important;
+    max-width:40px!important;
     height:40px!important;
     min-height:40px!important;
-  }
-
-  .notesFooter .saveNoteButton{
-    width:42px!important;
-    min-width:42px!important;
-    height:42px!important;
-    min-height:42px!important;
+    max-height:40px!important;
   }
 }
