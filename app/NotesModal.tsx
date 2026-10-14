@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Clock3, FileImage, FileText, NotebookPen, Paperclip, Plus, Save, Trash2, UploadCloud, X } from "lucide-react";
 
 export type NoteAttachment = {
@@ -48,6 +49,7 @@ function fileUrl(pathname: string) {
 }
 
 export default function NotesModal({ open, canEdit, onClose }: Props) {
+  const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState<StartpageNote[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
@@ -58,6 +60,17 @@ export default function NotesModal({ open, canEdit, onClose }: Props) {
   const [deleteArmed, setDeleteArmed] = useState(false);
 
   const selected = useMemo(() => notes.find(note => note.id === selectedId) || null, [notes, selectedId]);
+
+  useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!open || !mounted) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open, mounted]);
 
   async function loadNotes(preferredId?: string | null) {
     setStatus("Loading notes...");
@@ -198,15 +211,15 @@ export default function NotesModal({ open, canEdit, onClose }: Props) {
     }
   }
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
   const hasFiles = Boolean(selected?.attachments.length || pendingFiles.length);
 
-  return <div className="notesBackdrop" onMouseDown={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>
+  const modal = <div className="notesBackdrop" onMouseDown={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>
     <section className="notesModal" role="dialog" aria-modal="true" aria-label="Notes">
       <header className="notesHeader">
         <div><NotebookPen size={22}/><span><strong>Notes</strong><small>Personal archive with titles, dates and file attachments</small></span></div>
-        <div className="notesHeaderActions"><button type="button" onClick={createNew} disabled={!canEdit || busy}><Plus size={16}/> New note</button><button type="button" className="notesClose" onClick={onClose} disabled={busy}><X size={19}/></button></div>
+        <div className="notesHeaderActions"><button type="button" onClick={createNew} disabled={!canEdit || busy}><Plus size={16}/> <span>New note</span></button><button type="button" className="notesClose" onClick={onClose} disabled={busy} aria-label="Close notes"><X size={19}/></button></div>
       </header>
 
       {!canEdit ? <div className="notesLoginState"><NotebookPen size={36}/><strong>Notes are private</strong><p>Sign in with your Google account to view and edit your notes.</p><a href="/giris">Sign in with Google</a></div> : <div className="notesBody">
@@ -231,16 +244,18 @@ export default function NotesModal({ open, canEdit, onClose }: Props) {
               </article>)}
               {pendingFiles.map((file, index) => <article key={`${file.name}-${index}`} className="attachmentCard pending"><div className="attachmentPreview">{file.type.startsWith("image/") ? <FileImage size={34}/> : <FileText size={34}/>}</div><div><strong title={file.name}>{file.name}</strong><span>{formatSize(file.size)} · Ready to save</span></div><button type="button" onClick={() => setPendingFiles(files => files.filter((_, fileIndex) => fileIndex !== index))} disabled={busy} aria-label={`Remove ${file.name}`}><X size={14}/></button></article>)}
               <label className={hasFiles ? "attachmentAddTile compact" : "attachmentAddTile"}>
-                <UploadCloud size={hasFiles ? 18 : 23}/>
+                <UploadCloud size={hasFiles ? 18 : 22}/>
                 <span>Add image or PDF</span>
                 <input type="file" multiple accept="image/*,application/pdf" onChange={chooseFiles} disabled={busy}/>
               </label>
             </div>
           </section>
 
-          <footer className="notesFooter"><span>{status}</span><div>{selectedId && <button type="button" className={deleteArmed ? "danger armed" : "danger"} onClick={removeNote} disabled={busy}><Trash2 size={15}/>{deleteArmed ? "Delete?" : "Delete note"}</button>}<button type="button" className="saveNoteButton" onClick={save} disabled={busy}><Save size={16}/>{busy ? "Processing" : "Save"}</button></div></footer>
+          <footer className="notesFooter"><span>{status}</span><div>{selectedId && <button type="button" className={deleteArmed ? "danger armed" : "danger"} onClick={removeNote} disabled={busy} aria-label={deleteArmed ? "Confirm delete note" : "Delete note"} title={deleteArmed ? "Confirm delete" : "Delete note"}><Trash2 size={17}/></button>}<button type="button" className="saveNoteButton" onClick={save} disabled={busy} aria-label={busy ? "Processing" : "Save note"} title={busy ? "Processing" : "Save note"}><Save size={18}/></button></div></footer>
         </section>
       </div>}
     </section>
   </div>;
+
+  return createPortal(modal, document.body);
 }
