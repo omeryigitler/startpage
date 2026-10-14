@@ -27,8 +27,8 @@ type Props = {
 };
 
 function formatDate(value?: string) {
-  if (!value) return "Henüz kaydedilmedi";
-  return new Intl.DateTimeFormat("tr-TR", {
+  if (!value) return "Not saved yet";
+  return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -60,10 +60,10 @@ export default function NotesModal({ open, canEdit, onClose }: Props) {
   const selected = useMemo(() => notes.find(note => note.id === selectedId) || null, [notes, selectedId]);
 
   async function loadNotes(preferredId?: string | null) {
-    setStatus("Notlar yükleniyor...");
+    setStatus("Loading notes...");
     const response = await fetch("/api/notes", { cache: "no-store" });
     const data = await response.json() as { notes?: StartpageNote[]; error?: string };
-    if (!response.ok) throw new Error(data.error || "Notlar yüklenemedi.");
+    if (!response.ok) throw new Error(data.error || "Notes could not be loaded.");
 
     const nextNotes = data.notes || [];
     setNotes(nextNotes);
@@ -78,12 +78,12 @@ export default function NotesModal({ open, canEdit, onClose }: Props) {
       setContent("");
     }
     setPendingFiles([]);
-    setStatus(nextNotes.length ? "Notlar güncel." : "İlk notunu oluşturabilirsin.");
+    setStatus(nextNotes.length ? "Notes are up to date." : "Create your first note.");
   }
 
   useEffect(() => {
     if (!open || !canEdit) return;
-    loadNotes().catch(error => setStatus(error instanceof Error ? error.message : "Notlar yüklenemedi."));
+    loadNotes().catch(error => setStatus(error instanceof Error ? error.message : "Notes could not be loaded."));
   }, [open, canEdit]);
 
   useEffect(() => {
@@ -101,7 +101,7 @@ export default function NotesModal({ open, canEdit, onClose }: Props) {
     setContent("");
     setPendingFiles([]);
     setDeleteArmed(false);
-    setStatus("Yeni not hazırlanıyor.");
+    setStatus("New note ready.");
   }
 
   function chooseFiles(event: ChangeEvent<HTMLInputElement>) {
@@ -113,21 +113,21 @@ export default function NotesModal({ open, canEdit, onClose }: Props) {
     const next = sized.slice(0, available);
     setPendingFiles(current => [...current, ...next]);
 
-    if (allowed.length !== incoming.length) setStatus("Yalnızca görsel ve PDF kabul edilir.");
-    else if (sized.length !== allowed.length) setStatus("Her dosya en fazla 4 MB olabilir.");
-    else if (next.length !== sized.length) setStatus("Bir nota en fazla 12 dosya eklenebilir.");
-    else setStatus(`${next.length} dosya kaydetmeye hazır.`);
+    if (allowed.length !== incoming.length) setStatus("Only images and PDF files are supported.");
+    else if (sized.length !== allowed.length) setStatus("Each file can be up to 4 MB.");
+    else if (next.length !== sized.length) setStatus("A note can contain up to 12 files.");
+    else setStatus(`${next.length} file${next.length === 1 ? "" : "s"} ready to save.`);
   }
 
   async function save() {
     const cleanTitle = title.trim();
     if (!cleanTitle) {
-      setStatus("Not başlığı gerekli.");
+      setStatus("A note title is required.");
       return;
     }
 
     setBusy(true);
-    setStatus("Not kaydediliyor...");
+    setStatus("Saving note...");
     try {
       const response = await fetch("/api/notes", {
         method: selectedId ? "PUT" : "POST",
@@ -135,23 +135,23 @@ export default function NotesModal({ open, canEdit, onClose }: Props) {
         body: JSON.stringify({ id: selectedId || undefined, title: cleanTitle, content }),
       });
       const data = await response.json() as { note?: StartpageNote; error?: string };
-      if (!response.ok || !data.note) throw new Error(data.error || "Not kaydedilemedi.");
+      if (!response.ok || !data.note) throw new Error(data.error || "Note could not be saved.");
 
       const savedId = data.note.id;
       for (const file of pendingFiles) {
-        setStatus(`${file.name} yükleniyor...`);
+        setStatus(`Uploading ${file.name}...`);
         const form = new FormData();
         form.set("noteId", savedId);
         form.set("file", file);
         const uploadResponse = await fetch("/api/notes/upload", { method: "POST", body: form });
         const uploadData = await uploadResponse.json() as { error?: string };
-        if (!uploadResponse.ok) throw new Error(uploadData.error || `${file.name} yüklenemedi.`);
+        if (!uploadResponse.ok) throw new Error(uploadData.error || `${file.name} could not be uploaded.`);
       }
 
       await loadNotes(savedId);
-      setStatus(pendingFiles.length ? "Not ve dosyalar kaydedildi." : "Not kaydedildi.");
+      setStatus(pendingFiles.length ? "Note and files saved." : "Note saved.");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Not kaydedilemedi.");
+      setStatus(error instanceof Error ? error.message : "Note could not be saved.");
     } finally {
       setBusy(false);
     }
@@ -160,16 +160,16 @@ export default function NotesModal({ open, canEdit, onClose }: Props) {
   async function removeAttachment(attachment: NoteAttachment) {
     if (!selectedId || busy) return;
     setBusy(true);
-    setStatus(`${attachment.name} siliniyor...`);
+    setStatus(`Removing ${attachment.name}...`);
     try {
       const query = new URLSearchParams({ noteId: selectedId, pathname: attachment.pathname });
       const response = await fetch(`/api/notes/upload?${query}`, { method: "DELETE" });
       const data = await response.json() as { error?: string };
-      if (!response.ok) throw new Error(data.error || "Dosya silinemedi.");
+      if (!response.ok) throw new Error(data.error || "File could not be removed.");
       await loadNotes(selectedId);
-      setStatus("Dosya silindi.");
+      setStatus("File removed.");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Dosya silinemedi.");
+      setStatus(error instanceof Error ? error.message : "File could not be removed.");
     } finally {
       setBusy(false);
     }
@@ -179,7 +179,7 @@ export default function NotesModal({ open, canEdit, onClose }: Props) {
     if (!selectedId || busy) return;
     if (!deleteArmed) {
       setDeleteArmed(true);
-      setStatus("Notu silmek için Silinsin mi? düğmesine tekrar bas.");
+      setStatus("Press Delete again to confirm.");
       return;
     }
 
@@ -187,11 +187,11 @@ export default function NotesModal({ open, canEdit, onClose }: Props) {
     try {
       const response = await fetch(`/api/notes?id=${encodeURIComponent(selectedId)}`, { method: "DELETE" });
       const data = await response.json() as { error?: string };
-      if (!response.ok) throw new Error(data.error || "Not silinemedi.");
+      if (!response.ok) throw new Error(data.error || "Note could not be deleted.");
       await loadNotes(null);
-      setStatus("Not silindi.");
+      setStatus("Note deleted.");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Not silinemedi.");
+      setStatus(error instanceof Error ? error.message : "Note could not be deleted.");
     } finally {
       setBusy(false);
       setDeleteArmed(false);
@@ -200,40 +200,45 @@ export default function NotesModal({ open, canEdit, onClose }: Props) {
 
   if (!open) return null;
 
+  const hasFiles = Boolean(selected?.attachments.length || pendingFiles.length);
+
   return <div className="notesBackdrop" onMouseDown={event => { if (event.target === event.currentTarget && !busy) onClose(); }}>
-    <section className="notesModal" role="dialog" aria-modal="true" aria-label="Notlar">
+    <section className="notesModal" role="dialog" aria-modal="true" aria-label="Notes">
       <header className="notesHeader">
-        <div><NotebookPen size={22}/><span><strong>Notlar</strong><small>Başlık, tarih ve dosya ekleriyle kişisel arşiv</small></span></div>
-        <div className="notesHeaderActions"><button type="button" onClick={createNew} disabled={!canEdit || busy}><Plus size={16}/> Yeni not</button><button type="button" className="notesClose" onClick={onClose} disabled={busy}><X size={19}/></button></div>
+        <div><NotebookPen size={22}/><span><strong>Notes</strong><small>Personal archive with titles, dates and file attachments</small></span></div>
+        <div className="notesHeaderActions"><button type="button" onClick={createNew} disabled={!canEdit || busy}><Plus size={16}/> New note</button><button type="button" className="notesClose" onClick={onClose} disabled={busy}><X size={19}/></button></div>
       </header>
 
-      {!canEdit ? <div className="notesLoginState"><NotebookPen size={36}/><strong>Notlar özel alandır</strong><p>Notlarını görmek ve düzenlemek için Google hesabınla yönetim girişini aç.</p><a href="/giris">Google ile giriş yap</a></div> : <div className="notesBody">
+      {!canEdit ? <div className="notesLoginState"><NotebookPen size={36}/><strong>Notes are private</strong><p>Sign in with your Google account to view and edit your notes.</p><a href="/giris">Sign in with Google</a></div> : <div className="notesBody">
         <aside className="notesList">
-          <div className="notesListTitle"><strong>Tüm notlar</strong><span>{notes.length}</span></div>
-          <div className="notesListScroll">{notes.map(note => <button type="button" key={note.id} className={note.id === selectedId ? "active" : ""} onClick={() => setSelectedId(note.id)}><strong>{note.title}</strong><p>{note.content || "İçerik yok"}</p><span><Clock3 size={12}/>{formatDate(note.updatedAt)}</span>{note.attachments.length > 0 && <i><Paperclip size={11}/>{note.attachments.length}</i>}</button>)}{!notes.length && <div className="notesEmpty"><NotebookPen size={28}/><span>Henüz not yok</span></div>}</div>
+          <div className="notesListTitle"><strong>All notes</strong><span>{notes.length}</span></div>
+          <div className="notesListScroll">{notes.map(note => <button type="button" key={note.id} className={note.id === selectedId ? "active" : ""} onClick={() => setSelectedId(note.id)}><strong>{note.title}</strong><p>{note.content || "No content"}</p><span><Clock3 size={12}/>{formatDate(note.updatedAt)}</span>{note.attachments.length > 0 && <i><Paperclip size={11}/>{note.attachments.length}</i>}</button>)}{!notes.length && <div className="notesEmpty"><NotebookPen size={28}/><span>No notes yet</span></div>}</div>
         </aside>
 
         <section className="noteEditor">
           <div className="noteFields">
-            <input className="noteTitleInput" value={title} onChange={event => setTitle(event.target.value)} placeholder="Not başlığı" maxLength={180}/>
-            <div className="noteDates"><span><strong>Oluşturuldu</strong>{formatDate(selected?.createdAt)}</span><span><strong>Son düzenleme</strong>{formatDate(selected?.updatedAt)}</span></div>
-            <textarea value={content} onChange={event => setContent(event.target.value)} placeholder="Notunu buraya yaz..." maxLength={50000}/>
+            <input className="noteTitleInput" value={title} onChange={event => setTitle(event.target.value)} placeholder="Note title" maxLength={180}/>
+            <div className="noteDates"><span><strong>Created</strong>{formatDate(selected?.createdAt)}</span><span><strong>Last edited</strong>{formatDate(selected?.updatedAt)}</span></div>
+            <textarea value={content} onChange={event => setContent(event.target.value)} placeholder="Write your note here..." maxLength={50000}/>
           </div>
 
           <section className="noteAttachments">
-            <header><div><Paperclip size={16}/><strong>Ekler</strong></div><label><UploadCloud size={15}/> Görsel veya PDF<input type="file" multiple accept="image/*,application/pdf" onChange={chooseFiles} disabled={busy}/></label></header>
             <div className="attachmentGrid">
               {selected?.attachments.map(attachment => <article key={attachment.pathname} className="attachmentCard">
                 <a href={fileUrl(attachment.pathname)} target="_blank" rel="noreferrer" className="attachmentPreview">{attachment.contentType.startsWith("image/") ? <img src={fileUrl(attachment.pathname)} alt={attachment.name}/> : <FileText size={34}/>}</a>
                 <div><strong title={attachment.name}>{attachment.name}</strong><span>{formatSize(attachment.size)} · {formatDate(attachment.uploadedAt)}</span></div>
-                <button type="button" onClick={() => removeAttachment(attachment)} disabled={busy} aria-label={`${attachment.name} dosyasını sil`}><Trash2 size={14}/></button>
+                <button type="button" onClick={() => removeAttachment(attachment)} disabled={busy} aria-label={`Remove ${attachment.name}`}><Trash2 size={14}/></button>
               </article>)}
-              {pendingFiles.map((file, index) => <article key={`${file.name}-${index}`} className="attachmentCard pending"><div className="attachmentPreview">{file.type.startsWith("image/") ? <FileImage size={34}/> : <FileText size={34}/>}</div><div><strong title={file.name}>{file.name}</strong><span>{formatSize(file.size)} · Kaydetmeye hazır</span></div><button type="button" onClick={() => setPendingFiles(files => files.filter((_, fileIndex) => fileIndex !== index))} disabled={busy}><X size={14}/></button></article>)}
-              {!selected?.attachments.length && !pendingFiles.length && <div className="attachmentsEmpty"><Paperclip size={20}/><span>Bu nota henüz dosya eklenmedi.</span></div>}
+              {pendingFiles.map((file, index) => <article key={`${file.name}-${index}`} className="attachmentCard pending"><div className="attachmentPreview">{file.type.startsWith("image/") ? <FileImage size={34}/> : <FileText size={34}/>}</div><div><strong title={file.name}>{file.name}</strong><span>{formatSize(file.size)} · Ready to save</span></div><button type="button" onClick={() => setPendingFiles(files => files.filter((_, fileIndex) => fileIndex !== index))} disabled={busy} aria-label={`Remove ${file.name}`}><X size={14}/></button></article>)}
+              <label className={hasFiles ? "attachmentAddTile compact" : "attachmentAddTile"}>
+                <UploadCloud size={hasFiles ? 18 : 23}/>
+                <span>Add image or PDF</span>
+                <input type="file" multiple accept="image/*,application/pdf" onChange={chooseFiles} disabled={busy}/>
+              </label>
             </div>
           </section>
 
-          <footer className="notesFooter"><span>{status}</span><div>{selectedId && <button type="button" className={deleteArmed ? "danger armed" : "danger"} onClick={removeNote} disabled={busy}><Trash2 size={15}/>{deleteArmed ? "Silinsin mi?" : "Notu sil"}</button>}<button type="button" className="saveNoteButton" onClick={save} disabled={busy}><Save size={16}/>{busy ? "İşleniyor" : "Kaydet"}</button></div></footer>
+          <footer className="notesFooter"><span>{status}</span><div>{selectedId && <button type="button" className={deleteArmed ? "danger armed" : "danger"} onClick={removeNote} disabled={busy}><Trash2 size={15}/>{deleteArmed ? "Delete?" : "Delete note"}</button>}<button type="button" className="saveNoteButton" onClick={save} disabled={busy}><Save size={16}/>{busy ? "Processing" : "Save"}</button></div></footer>
         </section>
       </div>}
     </section>
