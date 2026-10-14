@@ -1,0 +1,225 @@
+/* Taurus management — English admin workspace aligned with Notes and Startpage. */
+.adminPage{
+  min-height:100dvh!important;
+  padding:58px clamp(16px,4vw,56px) 120px!important;
+  color:var(--taurus-text,#f3f3ed)!important;
+  background:
+    radial-gradient(circle at 20% 0,rgba(255,215,0,.06),transparent 28%),
+    linear-gradient(180deg,#090806 0%,#050505 48%,#030303 100%)!important;
+  font-family:var(--taurus-body,"Manrope",system-ui,sans-serif)!important;
+}
+
+.adminHeader{
+  max-width:1360px!important;
+  margin:0 auto!important;
+  padding:0 0 24px!important;
+  display:flex!important;
+  align-items:flex-end!important;
+  justify-content:space-between!important;
+  gap:20px!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;
+}
+
+.adminHeader p{
+  margin:0 0 8px!important;
+  color:#FFD700!important;
+  font:800 10px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  letter-spacing:.15em!important;
+}
+
+.adminHeader h1{
+  margin:0!important;
+  color:#fff!important;
+  font:800 clamp(38px,5vw,64px)/.98 var(--taurus-body,"Manrope",system-ui,sans-serif)!important;
+  letter-spacing:-.055em!important;
+}
+
+.adminHeader a{
+  min-height:42px!important;
+  padding:0 14px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  border:1px solid rgba(255,255,255,.11)!important;
+  border-radius:999px!important;
+  background:rgba(255,255,255,.025)!important;
+  color:#d8d8d0!important;
+  font-size:12px!important;
+  font-weight:700!important;
+}
+
+.adminHeader a:hover{border-color:rgba(255,215,0,.32)!important;color:#FFD700!important}
+
+.adminForm{max-width:1360px!important;margin:24px auto 0!important}
+
+.adminSection{
+  margin:0 0 16px!important;
+  padding:20px!important;
+  overflow:hidden!important;
+  border:1px solid rgba(255,215,0,.22)!important;
+  border-radius:20px!important;
+  background:
+    radial-gradient(circle at 10% 0,rgba(255,215,0,.035),transparent 26%),
+    linear-gradient(155deg,rgba(15,14,10,.98),rgba(6,6,5,.99))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
+}
+
+.sectionHeading{
+  min-width:0!important;
+  min-height:42px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+}
+
+.sectionHeading>div{min-width:0!important;display:flex!important;align-items:center!important;gap:10px!important}
+.sectionHeading span{color:#FFD700!important;font:800 9px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;letter-spacing:.12em!important}
+.sectionHeading h2{margin:0!important;color:#fff!important;font:800 18px/1.2 var(--taurus-body,"Manrope",system-ui,sans-serif)!important;letter-spacing:-.025em!important}
+
+.sectionHeading button,.addLink,.saveBar button{
+  min-height:40px!important;
+  padding:0 14px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  border:1px solid rgba(255,215,0,.42)!important;
+  border-radius:999px!important;
+  background:rgba(255,215,0,.05)!important;
+  color:#FFD700!important;
+  font:800 11px/1 var(--taurus-body,"Manrope",system-ui,sans-serif)!important;
+  cursor:pointer!important;
+}
+.sectionHeading button:hover,.addLink:hover{background:rgba(255,215,0,.1)!important;border-color:rgba(255,215,0,.65)!important}
+
+.editorGrid{
+  margin-top:16px!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:12px!important;
+}
+
+.editorCard,.folderEditor{
+  min-width:0!important;
+  padding:14px!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  border-radius:15px!important;
+  background:rgba(255,255,255,.018)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.018)!important;
+}
+.editorCard{display:flex!important;flex-direction:column!important;gap:8px!important}
+.editorCard small{color:#96968e!important;font-size:11px!important;line-height:1.5!important}
+
+.adminForm input{
+  width:100%!important;
+  min-width:0!important;
+  height:43px!important;
+  padding:0 12px!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  border-radius:11px!important;
+  background:#0d0d0b!important;
+  color:#f3f3ed!important;
+  outline:0!important;
+  font-size:13px!important;
+  font-weight:600!important;
+}
+.adminForm input::placeholder{color:#686860!important}
+.adminForm input:focus{border-color:rgba(255,215,0,.5)!important;box-shadow:0 0 0 2px rgba(255,215,0,.045)!important}
+
+.danger,.folderEditorHead button,.linkEditor button{
+  width:38px!important;
+  min-width:38px!important;
+  height:38px!important;
+  min-height:38px!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  border-radius:50%!important;
+  background:rgba(255,255,255,.025)!important;
+  color:#d47e86!important;
+  cursor:pointer!important;
+}
+.danger:hover,.folderEditorHead button:hover,.linkEditor button:hover{border-color:rgba(255,100,115,.34)!important;background:rgba(255,70,90,.06)!important}
+
+.folderEditors{
+  margin-top:16px!important;
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:12px!important;
+}
+.folderEditorHead{display:grid!important;grid-template-columns:minmax(0,1fr) 38px!important;gap:8px!important;margin-bottom:8px!important}
+.folderEditorHead input{font-weight:800!important}
+
+.linkEditor{
+  min-width:0!important;
+  margin-top:8px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) 38px!important;
+  gap:7px!important;
+  align-items:center!important;
+}
+
+.addLink{margin-top:10px!important;background:rgba(255,255,255,.025)!important;border-color:rgba(255,255,255,.09)!important;color:#d8d8d0!important}
+
+.twoColAdmin{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:20px!important}
+.twoColAdmin>div{min-width:0!important}
+
+.saveBar{
+  position:fixed!important;
+  z-index:100!important;
+  left:50%!important;
+  bottom:max(18px,env(safe-area-inset-bottom))!important;
+  transform:translateX(-50%)!important;
+  width:min(720px,calc(100vw - 28px))!important;
+  min-height:58px!important;
+  padding:8px 8px 8px 16px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  border-radius:999px!important;
+  background:rgba(7,7,6,.9)!important;
+  box-shadow:0 20px 70px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.025)!important;
+  backdrop-filter:blur(22px)!important;
+  -webkit-backdrop-filter:blur(22px)!important;
+}
+.saveBar span{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;color:#94948c!important;font-size:11px!important;font-weight:650!important}
+.saveBar button{flex:0 0 auto!important;min-height:42px!important;background:#FFD700!important;color:#080704!important;border-color:#FFD700!important;padding:0 16px!important}
+.saveBar button:disabled{opacity:.6!important;cursor:wait!important}
+
+@media(max-width:1050px){
+  .editorGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .folderEditors{grid-template-columns:1fr!important}
+}
+
+@media(max-width:760px){
+  .adminPage{padding:46px 12px 104px!important}
+  .adminHeader{align-items:flex-start!important;padding-bottom:18px!important}
+  .adminHeader h1{font-size:36px!important}
+  .adminHeader a{width:42px!important;min-width:42px!important;height:42px!important;padding:0!important;font-size:0!important;justify-content:center!important}
+  .adminSection{padding:15px!important;border-radius:16px!important}
+  .sectionHeading{align-items:flex-start!important}
+  .sectionHeading h2{font-size:16px!important}
+  .sectionHeading button{min-height:38px!important;padding:0 11px!important;font-size:10px!important}
+  .editorGrid,.twoColAdmin{grid-template-columns:1fr!important}
+  .editorGrid{gap:10px!important}
+  .twoColAdmin{gap:18px!important}
+  .adminForm input{height:42px!important;font-size:12px!important}
+  .linkEditor{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr) 38px!important}
+  .saveBar{min-height:56px!important;padding-left:13px!important}
+  .saveBar span{font-size:10px!important}
+  .saveBar button{min-height:40px!important;padding:0 13px!important}
+}
+
+@media(max-width:480px){
+  .adminHeader h1{font-size:32px!important}
+  .sectionHeading button{font-size:0!important;width:38px!important;min-width:38px!important;padding:0!important}
+  .sectionHeading button svg{width:17px!important;height:17px!important}
+  .linkEditor{grid-template-columns:1fr 38px!important}
+  .linkEditor>input:nth-child(2){grid-column:1/2!important}
+  .linkEditor>button{grid-column:2!important;grid-row:1/3!important;align-self:center!important}
+  .saveBar span{max-width:58%!important}
+}
