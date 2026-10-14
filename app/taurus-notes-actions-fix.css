@@ -1,0 +1,77 @@
+/* Final notes action alignment fix — keeps footer actions inside the editor content rail. */
+.notesFooter{
+  height:auto!important;
+  min-height:64px!important;
+  padding:10px 0 2px!important;
+  margin:0 auto!important;
+}
+
+.notesFooter>div{
+  width:auto!important;
+  margin-left:auto!important;
+  justify-content:flex-end!important;
+}
+
+.notesFooter button{
+  flex:0 0 auto!important;
+}
+
+@media(max-width:700px){
+  .noteEditor{
+    grid-template-rows:minmax(0,1fr) auto auto!important;
+    padding:10px 12px max(14px,env(safe-area-inset-bottom))!important;
+  }
+
+  .notesFooter{
+    width:100%!important;
+    height:auto!important;
+    min-height:62px!important;
+    margin:8px 0 0!important;
+    padding:8px 4px 0!important;
+  }
+
+  .notesFooter>div{
+    width:auto!important;
+    margin-left:auto!important;
+    gap:10px!important;
+  }
+
+  .notesFooter button{
+    width:44px!important;
+    min-width:44px!important;
+    height:44px!important;
+    min-height:44px!important;
+  }
+
+  .notesFooter .saveNoteButton{
+    width:46px!important;
+    min-width:46px!important;
+    height:46px!important;
+    min-height:46px!important;
+  }
+}
+
+@media(max-width:420px){
+  .noteEditor{
+    padding:9px 10px max(12px,env(safe-area-inset-bottom))!important;
+  }
+
+  .notesFooter{
+    min-height:60px!important;
+    padding:8px 2px 0!important;
+  }
+}
+
+@media(max-height:680px) and (max-width:700px){
+  .noteEditor{
+    grid-template-rows:minmax(0,1fr) auto auto!important;
+    padding-bottom:max(10px,env(safe-area-inset-bottom))!important;
+  }
+
+  .notesFooter{
+    min-height:54px!important;
+    height:auto!important;
+    margin-top:6px!important;
+    padding-top:6px!important;
+  }
+}
