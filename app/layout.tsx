@@ -31,12 +31,8 @@ export const metadata: Metadata = {
   description: "Ömer Yiğitler's personal command startpage",
   manifest: "/site.webmanifest",
   icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
-      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
-    ],
-    shortcut: ["/favicon.ico"],
-    apple: [{ url: "/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
+    icon: [{ url: "/favicon-v2.svg", type: "image/svg+xml", sizes: "any" }],
+    shortcut: ["/favicon-v2.svg"],
   },
   appleWebApp: {
     capable: true,
