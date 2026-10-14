@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Startpage — Ömer Yiğitler",
   "short_name": "Startpage",
-  "description": "Ömer Yiğitler için kişisel başlangıç sayfası",
+  "description": "Ömer Yiğitler's personal command startpage",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -10,13 +10,13 @@
   "theme_color": "#050505",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/favicon-v2.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/favicon-v2.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "maskable"
