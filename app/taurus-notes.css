@@ -6,8 +6,8 @@
 }
 
 .notesModal{
-  width:min(1180px,94vw)!important;
-  height:min(760px,90vh)!important;
+  width:min(1220px,94vw)!important;
+  height:min(780px,90vh)!important;
   border:1px solid rgba(255,215,0,.34)!important;
   border-radius:18px!important;
   background:
@@ -23,19 +23,17 @@
 }
 
 .notesHeader{
-  min-height:82px!important;
-  padding:16px 18px!important;
+  min-height:88px!important;
+  padding:18px 20px!important;
   border-bottom:1px solid rgba(255,255,255,.08)!important;
   background:rgba(255,215,0,.012)!important;
 }
 
-.notesHeader>div:first-child{
-  gap:12px!important;
-}
+.notesHeader>div:first-child{gap:13px!important}
 
 .notesHeader>div:first-child>svg{
-  width:42px!important;
-  height:42px!important;
+  width:44px!important;
+  height:44px!important;
   padding:10px!important;
   border:1px solid rgba(255,215,0,.34)!important;
   border-radius:50%!important;
@@ -46,29 +44,28 @@
 
 .notesHeader strong{
   color:#fff!important;
-  font-size:18px!important;
+  font-size:20px!important;
   font-weight:800!important;
   letter-spacing:-.025em!important;
 }
 
 .notesHeader small{
-  color:#86867d!important;
-  font:700 8px/1.4 var(--taurus-mono,"JetBrains Mono",monospace)!important;
-  letter-spacing:.06em!important;
+  color:#aaa99f!important;
+  font:700 11px/1.45 var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  letter-spacing:.035em!important;
 }
 
-.notesHeaderActions{
-  gap:9px!important;
-}
+.notesHeaderActions{gap:10px!important}
 
 .notesHeaderActions button{
-  min-height:38px!important;
+  min-height:42px!important;
+  padding:0 14px!important;
   border:1px solid rgba(255,255,255,.1)!important;
   border-radius:999px!important;
   background:rgba(255,255,255,.028)!important;
-  color:#cfcfc8!important;
-  font:800 9px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
-  letter-spacing:.03em!important;
+  color:#d7d7d0!important;
+  font:800 11px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  letter-spacing:.02em!important;
 }
 
 .notesHeaderActions button:first-child{
@@ -84,16 +81,16 @@
 }
 
 .notesHeaderActions .notesClose{
-  width:40px!important;
-  min-width:40px!important;
-  height:40px!important;
+  width:42px!important;
+  min-width:42px!important;
+  height:42px!important;
   padding:0!important;
   border-radius:50%!important;
-  color:#9aa0a4!important;
+  color:#b3b8bc!important;
 }
 
 .notesBody{
-  grid-template-columns:270px minmax(0,1fr)!important;
+  grid-template-columns:290px minmax(0,1fr)!important;
   background:transparent!important;
 }
 
@@ -102,31 +99,29 @@
   background:rgba(255,255,255,.012)!important;
 }
 
-.notesListTitle{
-  padding:16px 15px 11px!important;
-}
+.notesListTitle{padding:18px 16px 13px!important}
 
 .notesListTitle strong{
-  color:#deded8!important;
-  font:800 9px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
-  letter-spacing:.08em!important;
+  color:#ecece6!important;
+  font:800 11px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  letter-spacing:.07em!important;
   text-transform:uppercase!important;
 }
 
 .notesListTitle span{
+  min-width:30px!important;
+  padding:5px 8px!important;
   background:rgba(255,215,0,.055)!important;
   border:1px solid rgba(255,215,0,.12)!important;
-  color:#a8963b!important;
-  font-family:var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  color:#c7b44b!important;
+  font:700 10px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
 }
 
-.notesListScroll{
-  padding:1px 10px 14px!important;
-}
+.notesListScroll{padding:2px 10px 14px!important}
 
 .notesListScroll>button{
-  margin:5px 0!important;
-  padding:12px 13px!important;
+  margin:6px 0!important;
+  padding:14px!important;
   border:1px solid transparent!important;
   border-radius:12px!important;
   background:transparent!important;
@@ -145,108 +140,104 @@
 }
 
 .notesListScroll>button strong{
-  color:#f2f2ec!important;
-  font-size:12px!important;
+  color:#f4f4ee!important;
+  font-size:14px!important;
+  line-height:1.35!important;
 }
 
 .notesListScroll>button p{
-  color:#77776f!important;
+  height:auto!important;
+  min-height:34px!important;
+  margin:7px 0!important;
+  color:#aaa99f!important;
+  font-size:11px!important;
+  line-height:1.5!important;
 }
 
 .notesListScroll>button>span{
-  color:#60605a!important;
-  font-family:var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  color:#85857d!important;
+  font:700 9px/1.4 var(--taurus-mono,"JetBrains Mono",monospace)!important;
 }
 
 .notesListScroll>button i{
   color:#FFD700!important;
+  font-size:9px!important;
 }
 
 .notesEmpty{
-  color:#66665f!important;
+  color:#8d8d85!important;
+  font-size:12px!important;
 }
+.notesEmpty svg{color:#a28f2c!important}
 
-.notesEmpty svg{
-  color:#8d7b22!important;
-}
+.noteEditor{background:transparent!important}
 
-.noteEditor{
-  background:transparent!important;
-}
-
-.noteFields{
-  padding:18px 20px 0!important;
-}
+.noteFields{padding:22px 22px 0!important}
 
 .noteTitleInput{
-  border-bottom:1px solid rgba(255,255,255,.085)!important;
+  border-bottom:1px solid rgba(255,255,255,.1)!important;
   color:#fff!important;
   font-family:var(--taurus-body,"Manrope",system-ui,sans-serif)!important;
-  font-size:28px!important;
+  font-size:30px!important;
   font-weight:800!important;
-  letter-spacing:-.04em!important;
+  line-height:1.2!important;
+  letter-spacing:-.035em!important;
 }
 
-.noteTitleInput::placeholder{
-  color:#54544f!important;
-}
-
-.noteTitleInput:focus{
-  border-color:rgba(255,215,0,.48)!important;
-}
+.noteTitleInput::placeholder{color:#696963!important}
+.noteTitleInput:focus{border-color:rgba(255,215,0,.48)!important}
 
 .noteDates{
-  color:#66665f!important;
-  font:700 7px/1.4 var(--taurus-mono,"JetBrains Mono",monospace)!important;
-  letter-spacing:.04em!important;
+  gap:28px!important;
+  padding:12px 0 14px!important;
+  color:#8b8b84!important;
+  font:700 10px/1.5 var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  letter-spacing:.025em!important;
 }
 
-.noteDates strong{
-  color:#96968e!important;
-}
+.noteDates span{gap:7px!important}
+.noteDates strong{color:#c2c2ba!important;font-size:10px!important}
 
 .noteFields>textarea{
-  min-height:215px!important;
-  border:1px solid rgba(255,255,255,.085)!important;
+  min-height:230px!important;
+  padding:17px!important;
+  border:1px solid rgba(255,255,255,.095)!important;
   border-radius:14px!important;
   background:rgba(255,255,255,.018)!important;
-  color:#ecece7!important;
+  color:#f0f0eb!important;
   font-family:var(--taurus-body,"Manrope",system-ui,sans-serif)!important;
-  font-size:13px!important;
-  line-height:1.7!important;
+  font-size:15px!important;
+  line-height:1.72!important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.018)!important;
 }
 
-.noteFields>textarea::placeholder{
-  color:#5f5f59!important;
-}
-
+.noteFields>textarea::placeholder{color:#777770!important}
 .noteFields>textarea:focus{
   border-color:rgba(255,215,0,.38)!important;
   box-shadow:0 0 0 1px rgba(255,215,0,.05),0 0 22px rgba(255,215,0,.035)!important;
 }
 
-.noteAttachments{
-  padding:14px 20px 0!important;
-}
+.noteAttachments{padding:16px 22px 0!important}
+
+.noteAttachments>header{margin-bottom:12px!important}
 
 .noteAttachments>header strong{
-  color:#deded8!important;
-  font:800 9px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
-  letter-spacing:.06em!important;
+  color:#ecece6!important;
+  font:800 11px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  letter-spacing:.055em!important;
   text-transform:uppercase!important;
 }
 
-.noteAttachments>header svg{
-  color:#FFD700!important;
-}
+.noteAttachments>header svg{color:#FFD700!important}
 
 .noteAttachments label{
+  min-height:38px!important;
+  padding:0 12px!important;
   border:1px solid rgba(255,255,255,.1)!important;
   border-radius:999px!important;
   background:rgba(255,255,255,.026)!important;
-  color:#9c9c94!important;
-  font:800 8px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  color:#b5b5ad!important;
+  font:800 10px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
 }
 
 .noteAttachments label:hover{
@@ -255,19 +246,16 @@
   background:rgba(255,215,0,.045)!important;
 }
 
-.attachmentGrid{
-  gap:9px!important;
-}
+.attachmentGrid{gap:10px!important}
 
 .attachmentCard{
+  min-height:72px!important;
+  padding:10px!important;
   border:1px solid rgba(255,255,255,.08)!important;
   border-radius:12px!important;
   background:rgba(255,255,255,.018)!important;
 }
-
-.attachmentCard.pending{
-  border-color:rgba(255,215,0,.24)!important;
-}
+.attachmentCard.pending{border-color:rgba(255,215,0,.24)!important}
 
 .attachmentPreview{
   border:1px solid rgba(255,255,255,.06)!important;
@@ -276,50 +264,48 @@
   color:#8d8d85!important;
 }
 
-.attachmentCard strong{
-  color:#e8e8e2!important;
-}
-
+.attachmentCard strong{color:#ededE7!important;font-size:11px!important}
 .attachmentCard span{
-  color:#686861!important;
-  font-family:var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  color:#8b8b84!important;
+  font:700 9px/1.4 var(--taurus-mono,"JetBrains Mono",monospace)!important;
 }
 
 .attachmentCard>button{
   border:1px solid rgba(255,255,255,.07)!important;
   background:rgba(255,255,255,.02)!important;
-  color:#b76e75!important;
+  color:#c57980!important;
 }
 
 .attachmentsEmpty{
-  border:1px dashed rgba(255,215,0,.14)!important;
+  min-height:100px!important;
+  border:1px dashed rgba(255,215,0,.16)!important;
   border-radius:12px!important;
   background:rgba(255,215,0,.008)!important;
-  color:#66665f!important;
-  font-family:var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  color:#8a8a82!important;
+  font:700 10px/1.5 var(--taurus-mono,"JetBrains Mono",monospace)!important;
 }
-
-.attachmentsEmpty svg{
-  color:#8f7d27!important;
-}
+.attachmentsEmpty svg{color:#a28f2c!important}
 
 .notesFooter{
-  padding:13px 20px 15px!important;
+  min-height:62px!important;
+  padding:14px 22px 16px!important;
   border-top:1px solid rgba(255,255,255,.075)!important;
   background:rgba(0,0,0,.1)!important;
 }
 
 .notesFooter>span{
-  color:#71716a!important;
-  font:700 8px/1.4 var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  color:#8f8f87!important;
+  font:700 10px/1.45 var(--taurus-mono,"JetBrains Mono",monospace)!important;
 }
 
 .notesFooter button{
+  min-height:40px!important;
+  padding:0 14px!important;
   border:1px solid rgba(255,255,255,.1)!important;
   border-radius:999px!important;
   background:rgba(255,255,255,.026)!important;
   color:#d8d8d2!important;
-  font:800 9px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  font:800 10px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
 }
 
 .notesFooter .saveNoteButton{
@@ -334,56 +320,56 @@
   box-shadow:0 0 28px rgba(255,215,0,.14)!important;
 }
 
-.notesFooter .danger{
-  color:#c5777e!important;
-}
-
+.notesFooter .danger{color:#d18289!important}
 .notesFooter .danger.armed{
   border-color:rgba(255,88,104,.38)!important;
   background:rgba(255,68,86,.08)!important;
 }
 
-.notesLoginState{
-  color:#efefe9!important;
-}
-
-.notesLoginState svg{
-  color:#FFD700!important;
-}
-
-.notesLoginState p{
-  color:#7c7c74!important;
-}
-
+.notesLoginState{color:#efefe9!important}
+.notesLoginState svg{color:#FFD700!important}
+.notesLoginState p{color:#aaa99f!important;font-size:14px!important;line-height:1.6!important}
 .notesLoginState a{
+  min-height:42px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  padding:0 16px!important;
   border:1px solid rgba(255,215,0,.48)!important;
   border-radius:999px!important;
   background:#FFD700!important;
   color:#080704!important;
-  font:800 9px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
+  font:800 11px/1 var(--taurus-mono,"JetBrains Mono",monospace)!important;
 }
 
 @media(max-width:1000px){
-  .notesBody{grid-template-columns:230px minmax(0,1fr)!important}
+  .notesBody{grid-template-columns:250px minmax(0,1fr)!important}
+  .notesHeader small{font-size:10px!important}
+  .noteFields>textarea{font-size:14px!important}
 }
 
 @media(max-width:700px){
   .notesBackdrop{padding:8px!important}
   .notesModal{width:100%!important;height:96vh!important;border-radius:16px!important}
-  .notesHeader{min-height:68px!important;padding:12px!important}
-  .notesHeader>div:first-child>svg{width:38px!important;height:38px!important;padding:9px!important}
+  .notesHeader{min-height:72px!important;padding:12px!important}
+  .notesHeader>div:first-child>svg{width:40px!important;height:40px!important;padding:9px!important}
+  .notesHeader strong{font-size:17px!important}
   .notesHeader small{display:none!important}
-  .notesHeaderActions button:first-child{padding:0 10px!important;font-size:8px!important}
+  .notesHeaderActions button:first-child{padding:0 11px!important;font-size:10px!important}
   .notesBody{grid-template-columns:1fr!important}
-  .notesList{max-height:166px!important;border-right:0!important;border-bottom:1px solid rgba(255,255,255,.075)!important}
+  .notesList{max-height:176px!important;border-right:0!important;border-bottom:1px solid rgba(255,255,255,.075)!important}
   .notesListScroll{display:flex!important;gap:7px!important;overflow-x:auto!important;overflow-y:hidden!important}
-  .notesListScroll>button{min-width:205px!important}
-  .noteFields{padding:14px 14px 0!important}
-  .noteTitleInput{font-size:22px!important}
-  .noteDates{display:grid!important;gap:4px!important}
-  .noteFields>textarea{min-height:150px!important}
+  .notesListScroll>button{min-width:220px!important}
+  .notesListScroll>button strong{font-size:13px!important}
+  .notesListScroll>button p{font-size:10px!important}
+  .noteFields{padding:15px 14px 0!important}
+  .noteTitleInput{font-size:24px!important}
+  .noteDates{display:grid!important;gap:5px!important;font-size:9px!important}
+  .noteFields>textarea{min-height:160px!important;font-size:14px!important}
   .noteAttachments{padding:12px 14px 0!important}
+  .noteAttachments>header strong{font-size:10px!important}
+  .noteAttachments label{font-size:9px!important}
   .notesFooter{padding:11px 14px!important}
-  .notesFooter>span{max-width:40%!important}
+  .notesFooter>span{max-width:42%!important;font-size:9px!important}
+  .notesFooter button{font-size:10px!important}
   .attachmentGrid{grid-template-columns:1fr!important}
 }
