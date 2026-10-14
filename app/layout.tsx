@@ -22,6 +22,7 @@ import "./taurus-weather-command.css";
 import "./history-entry.css";
 import "./taurus-standby.css";
 import "./taurus-notes.css";
+import "./taurus-notes-upload.css";
 import TaurusTicker from "./TaurusTicker";
 import TaurusCommandBridge from "./TaurusCommandBridge";
 import TaurusCommandEnhancements from "./TaurusCommandEnhancements";
