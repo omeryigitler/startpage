@@ -1,77 +1,136 @@
-/* Final notes action alignment fix — keeps footer actions inside the editor content rail. */
+/* Notes action dock — final geometry layer.
+   This file intentionally owns only the footer/action area so legacy Notes rules
+   elsewhere cannot pull the buttons back against the modal edge. */
+
 .notesFooter{
+  width:min(840px,100%)!important;
+  min-width:0!important;
   height:auto!important;
-  min-height:64px!important;
-  padding:10px 0 2px!important;
+  min-height:76px!important;
   margin:0 auto!important;
+  padding:14px 14px 16px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+  border-top:1px solid rgba(255,255,255,.06)!important;
+  background:linear-gradient(180deg,rgba(5,5,4,0),rgba(5,5,4,.34))!important;
+  box-sizing:border-box!important;
+}
+
+.notesFooter>span{
+  min-width:0!important;
+  flex:1 1 auto!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
 }
 
 .notesFooter>div{
   width:auto!important;
+  flex:0 0 auto!important;
   margin-left:auto!important;
+  padding:5px!important;
+  display:flex!important;
+  align-items:center!important;
   justify-content:flex-end!important;
+  gap:8px!important;
+  border:1px solid rgba(255,255,255,.075)!important;
+  border-radius:999px!important;
+  background:rgba(255,255,255,.018)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
 }
 
 .notesFooter button{
   flex:0 0 auto!important;
+  width:40px!important;
+  min-width:40px!important;
+  height:40px!important;
+  min-height:40px!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+.notesFooter .saveNoteButton{
+  width:42px!important;
+  min-width:42px!important;
+  height:42px!important;
+  min-height:42px!important;
 }
 
 @media(max-width:700px){
   .noteEditor{
     grid-template-rows:minmax(0,1fr) auto auto!important;
-    padding:10px 12px max(14px,env(safe-area-inset-bottom))!important;
+    padding:10px 12px max(20px,env(safe-area-inset-bottom))!important;
   }
 
   .notesFooter{
     width:100%!important;
-    height:auto!important;
-    min-height:62px!important;
+    min-height:72px!important;
     margin:8px 0 0!important;
-    padding:8px 4px 0!important;
+    padding:12px 10px 8px!important;
+    border-top-color:rgba(255,255,255,.055)!important;
+  }
+
+  .notesFooter>span{
+    display:none!important;
   }
 
   .notesFooter>div{
-    width:auto!important;
     margin-left:auto!important;
-    gap:10px!important;
+    padding:5px!important;
+    gap:8px!important;
   }
 
   .notesFooter button{
+    width:42px!important;
+    min-width:42px!important;
+    height:42px!important;
+    min-height:42px!important;
+  }
+
+  .notesFooter .saveNoteButton{
     width:44px!important;
     min-width:44px!important;
     height:44px!important;
     min-height:44px!important;
   }
-
-  .notesFooter .saveNoteButton{
-    width:46px!important;
-    min-width:46px!important;
-    height:46px!important;
-    min-height:46px!important;
-  }
 }
 
 @media(max-width:420px){
   .noteEditor{
-    padding:9px 10px max(12px,env(safe-area-inset-bottom))!important;
+    padding:9px 10px max(18px,env(safe-area-inset-bottom))!important;
   }
 
   .notesFooter{
-    min-height:60px!important;
-    padding:8px 2px 0!important;
+    min-height:70px!important;
+    padding:11px 8px 8px!important;
   }
 }
 
 @media(max-height:680px) and (max-width:700px){
   .noteEditor{
     grid-template-rows:minmax(0,1fr) auto auto!important;
-    padding-bottom:max(10px,env(safe-area-inset-bottom))!important;
+    padding-bottom:max(16px,env(safe-area-inset-bottom))!important;
   }
 
   .notesFooter{
-    min-height:54px!important;
-    height:auto!important;
+    min-height:64px!important;
     margin-top:6px!important;
-    padding-top:6px!important;
+    padding:9px 8px 7px!important;
+  }
+
+  .notesFooter button{
+    width:40px!important;
+    min-width:40px!important;
+    height:40px!important;
+    min-height:40px!important;
+  }
+
+  .notesFooter .saveNoteButton{
+    width:42px!important;
+    min-width:42px!important;
+    height:42px!important;
+    min-height:42px!important;
   }
 }
