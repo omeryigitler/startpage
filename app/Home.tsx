@@ -137,6 +137,7 @@ export default function Home() {
 
   const slides = useMemo<FolderSlide[]>(
     () => [
+      { id: "system", kind: "system", title: "System", subtitle: "Notes, management and Taurus Agent" },
       ...config.folders.map((folder, index) => ({
         id: `folder-${index}-${folder.title}`,
         kind: "links" as const,
@@ -146,7 +147,6 @@ export default function Home() {
       })),
       { id: "projects", kind: "projects", title: "Projects", subtitle: "Active work and live deployments" },
       { id: "daily", kind: "daily", title: "Daily", subtitle: "Weather, markets and today's status" },
-      { id: "system", kind: "system", title: "System", subtitle: "Notes, management and Taurus Agent" },
       { id: "history-archived", kind: "history", title: "The History Archived", subtitle: "Documentary production command center", href: "/history" },
     ],
     [config.folders],
