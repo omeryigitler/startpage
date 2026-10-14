@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import "./globals.css";
 import "./folder-glass.css";
 import "./home-overrides.css";
-import "./active-home.css";
+import "./active-home-clean.css";
 import "./full-width-search.css";
 import "./center-os-base.css";
 import "./center-os-slider.css";
