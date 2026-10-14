@@ -23,6 +23,7 @@ import "./history-entry.css";
 import "./taurus-standby.css";
 import "./taurus-notes-v3.css";
 import "./taurus-notes-actions-fix.css";
+import "./taurus-management.css";
 import TaurusTicker from "./TaurusTicker";
 import TaurusCommandBridge from "./TaurusCommandBridge";
 import TaurusCommandEnhancements from "./TaurusCommandEnhancements";
