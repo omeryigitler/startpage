@@ -178,6 +178,16 @@ html,body{background:#050505}
   filter:drop-shadow(0 0 16px rgba(255,215,0,.18));
 }
 
+.taurusStartpage:not(.is-launched) .centerLogoButton{
+  width:min(184px,48vmin);
+  height:min(184px,48vmin);
+}
+
+.taurusStartpage:not(.is-launched) .centerLogoButton img{
+  width:90%;
+  height:90%;
+}
+
 .logoScanLine{
   position:absolute;
   z-index:3;
