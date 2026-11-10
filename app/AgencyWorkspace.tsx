@@ -180,7 +180,7 @@ export default function AgencyWorkspace({ section, onNavigate, onClose }: { sect
   }, [onClose]);
   return createPortal(<div className={styles.workspace} ref={root} role="dialog" aria-modal="true" aria-labelledby="agency-title" lang="en">
     <aside className={styles.sidebar}>
-      <button className={styles.brand} ref={back} onClick={onClose}><img src="/logo.png" alt="" /><span>TAURUS<span>START / AGENCY</span></span><ArrowDownLeft size={17} /></button>
+      <button className={styles.brand} ref={back} onClick={onClose}><span className={styles.brandMark}><img src="/taurus-mark.svg" alt="" /></span><span className={styles.brandWord}>TAURUS<span>Startpage / Agency</span></span><ArrowDownLeft size={17} /></button>
       <span className={styles.navLabel}>WORKSPACE</span>
       <nav aria-label="Agency sections">{agencySections.map(entry => { const EntryIcon = icons[entry.id]; return <button key={entry.id} className={section === entry.id ? styles.active : ""} aria-current={section === entry.id ? "page" : undefined} onClick={() => onNavigate(entry.id)}><EntryIcon size={18} /><span>{entry.title}</span>{section === entry.id && <i />}</button>; })}</nav>
       <footer><span><ShieldCheck size={14} /> Private workspace</span><button onClick={onClose}>Back to Startpage <ArrowDownLeft size={14} /></button></footer>
