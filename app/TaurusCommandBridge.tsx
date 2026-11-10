@@ -272,16 +272,21 @@ export default function TaurusCommandBridge() {
 
   const openModule = useCallback((title: string) => {
     const requested = normalizeCommand(title);
+    if (/\b(agency|ajans|studio|studyo|satis|sales|musteriler|clients|teklifler|dunya|world)\b/.test(requested)) {
+      const section = /dunya|world/.test(requested) ? "world" : /satis|sales/.test(requested) ? "sales" : /studio|studyo/.test(requested) ? "studio" : /musteriler|clients/.test(requested) ? "clients" : /teklifler/.test(requested) ? "quotes" : "overview";
+      window.location.hash = `agency/${section}`;
+      return true;
+    }
     const folderIndex = configRef.current.folders.findIndex((folder) => {
       const name = normalizeCommand(folder.title);
       return name === requested || name.includes(requested) || requested.includes(name);
     });
     const special = [
-      { names: ["projeler", "projects"], index: configRef.current.folders.length },
-      { names: ["gunluk", "daily"], index: configRef.current.folders.length + 1 },
-      { names: ["sistem", "system"], index: configRef.current.folders.length + 2 },
+      { names: ["projeler", "projects"], index: configRef.current.folders.length + 2 },
+      { names: ["gunluk", "daily"], index: configRef.current.folders.length + 3 },
+      { names: ["sistem", "system"], index: 1 },
     ].find((item) => item.names.some((name) => requested.includes(name)));
-    const index = folderIndex >= 0 ? folderIndex : special?.index;
+    const index = folderIndex >= 0 ? folderIndex + 2 : special?.index;
     if (index === undefined || index < 0) return false;
 
     const main = document.querySelector<HTMLElement>(".taurusStartpage");
