@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -9,6 +10,7 @@ import {
   ArrowUpRight,
   Bot,
   BrainCircuit,
+  BriefcaseBusiness,
   Clock3,
   CloudSun,
   Command,
@@ -33,6 +35,9 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { defaultConfig, normalizeEnglishConfig, StartpageConfig } from "./startpage-config";
 import NotesModal from "./NotesModal";
+import { agencySectionFromHash, type AgencySection } from "./agency-model";
+
+const AgencyWorkspace = dynamic(() => import("./AgencyWorkspace"), { ssr: false });
 
 const STORAGE_KEY = "startpage-config-v1";
 const IDLE_TIMEOUT_MS = 120_000;
@@ -62,6 +67,7 @@ type FolderSlide =
   | { id: string; kind: "projects"; title: string; subtitle: string }
   | { id: string; kind: "daily"; title: string; subtitle: string }
   | { id: string; kind: "system"; title: string; subtitle: string }
+  | { id: string; kind: "agency"; title: string; subtitle: string }
   | { id: string; kind: "history"; title: string; subtitle: string; href: string };
 
 const slideVariants = {
@@ -97,6 +103,7 @@ function faviconUrl(url: string) {
 }
 
 function iconForSlide(slide: FolderSlide): LucideIcon {
+  if (slide.kind === "agency") return BriefcaseBusiness;
   if (slide.kind === "projects") return FolderKanban;
   if (slide.kind === "daily") return Activity;
   if (slide.kind === "system") return SlidersHorizontal;
@@ -122,6 +129,7 @@ export default function Home() {
   const [markets, setMarkets] = useState<MarketData>({});
   const [canEdit, setCanEdit] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [agencySection, setAgencySection] = useState<AgencySection | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [openFolderId, setOpenFolderId] = useState<string | null>(null);
@@ -137,6 +145,7 @@ export default function Home() {
 
   const slides = useMemo<FolderSlide[]>(
     () => [
+      { id: "agency", kind: "agency", title: "Agency", subtitle: "Sales, studio and project operations" },
       { id: "system", kind: "system", title: "System", subtitle: "Notes, management and Taurus Agent" },
       ...config.folders.map((folder, index) => ({
         id: `folder-${index}-${folder.title}`,
@@ -178,6 +187,25 @@ export default function Home() {
   const CurrentIcon = iconForSlide(currentSlide);
   const LeftIcon = iconForSlide(slides[leftIndex]);
   const RightIcon = iconForSlide(slides[rightIndex]);
+
+  const openAgency = useCallback((section: AgencySection = "overview") => {
+    setAgencySection(section);
+    window.history.replaceState(null, "", `#agency/${section}`);
+  }, []);
+  const closeAgency = useCallback(() => {
+    setAgencySection(null);
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  }, []);
+  useEffect(() => {
+    const sync = () => {
+      const section = agencySectionFromHash(window.location.hash);
+      setAgencySection(section);
+      if (section) { setLaunched(true); setWorkspaceOpen(true); }
+    };
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, []);
 
   function launchAndFocus() {
     setLaunched(true);
@@ -271,6 +299,7 @@ export default function Home() {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
 
     const onKey = (event: KeyboardEvent) => {
+      if (agencySection) return;
       const target = event.target as HTMLElement | null;
       const isTyping = target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable;
 
@@ -300,10 +329,10 @@ export default function Home() {
       window.clearInterval(timer);
       window.removeEventListener("keydown", onKey);
     };
-  }, [workspaceOpen, slides.length, openFolderId]);
+  }, [workspaceOpen, slides.length, openFolderId, agencySection]);
 
   useEffect(() => {
-    if (!launched) {
+    if (!launched || agencySection) {
       if (idleTimerRef.current !== null) {
         window.clearTimeout(idleTimerRef.current);
         idleTimerRef.current = null;
@@ -334,7 +363,7 @@ export default function Home() {
       window.removeEventListener("touchstart", resetIdleTimer);
       window.removeEventListener("wheel", resetIdleTimer);
     };
-  }, [launched]);
+  }, [launched, agencySection]);
 
   useEffect(() => {
     let cancelled = false;
@@ -369,6 +398,16 @@ export default function Home() {
   }, [config.markets]);
 
   function renderSlideContent(slide: FolderSlide) {
+    if (slide.kind === "agency") {
+      return <div className="systemFolderGrid">
+        {([
+          ["overview", "Agency workspace", "Sales, studio, clients and project delivery", BriefcaseBusiness],
+          ["world", "World", "Live visitor intelligence and globe", Radar],
+          ["projects", "Project operations", "Projects, proposals and delivery", FolderKanban],
+          ["control", "AI controls", "Execution state and request limits", SlidersHorizontal],
+        ] as const).map(([section, title, note, Icon]) => <button key={section} type="button" onClick={() => openAgency(section)}><Icon size={23} /><span><strong>{title}</strong><small>{note}</small></span><ArrowUpRight size={17} /></button>)}
+      </div>;
+    }
     if (slide.kind === "links") {
       return (
         <div className="folderLinkGrid">
@@ -488,11 +527,11 @@ export default function Home() {
           <span><strong>Management</strong><small>Edit folders and links</small></span>
           <ArrowUpRight size={17} />
         </Link>
-        <a href="https://omeryigitler.com/agent.html" target="_blank" rel="noreferrer">
+        <Link href="/yonetim/agent">
           <Bot size={23} />
           <span><strong>Taurus Agent</strong><small>omeryigitler.com management assistant</small></span>
           <ArrowUpRight size={17} />
-        </a>
+        </Link>
         <a href="https://omeryigitler.com" target="_blank" rel="noreferrer">
           <Gauge size={23} />
           <span><strong>omeryigitler.com</strong><small>Open main portfolio</small></span>
@@ -619,6 +658,10 @@ export default function Home() {
                     if (info.offset.x > 60) paginate(-1);
                   }}
                   onClick={() => {
+                    if (currentSlide.kind === "agency") {
+                      openAgency();
+                      return;
+                    }
                     if (currentSlide.kind === "history") {
                       window.location.href = currentSlide.href;
                       return;
@@ -664,6 +707,7 @@ export default function Home() {
       </section>
 
       <NotesModal open={notesOpen} canEdit={canEdit} onClose={() => setNotesOpen(false)} />
+      {agencySection && <AgencyWorkspace section={agencySection} onNavigate={openAgency} onClose={closeAgency} />}
     </main>
   );
 }
