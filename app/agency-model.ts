@@ -1,15 +1,15 @@
 export const AGENCY_ORIGIN = "https://omeryigitler.com";
 export const agencySections = [
-  { id: "overview", title: "Genel bakış", description: "Ajansın günlük çalışma alanı" },
-  { id: "sales", title: "Satış", description: "Malta ve Türkiye firma havuzu" },
-  { id: "studio", title: "Stüdyo", description: "Ekip rolleri ve görev kuyruğu" },
-  { id: "projects", title: "Projeler", description: "Teslimatlar ve proje yönetimi", view: "projects" },
-  { id: "clients", title: "Müşteriler", description: "Müşteri kayıtları ve ilişkiler", view: "clients" },
-  { id: "quotes", title: "Teklifler", description: "Teklifler, onaylar ve PDF", view: "quotes" },
-  { id: "pricing", title: "Fiyatlandırma", description: "Türkiye ve Malta teklif hesabı", view: "pricing" },
-  { id: "messages", title: "Mesajlar", description: "Gelen talepler ve iletişim", view: "messages" },
-  { id: "world", title: "Dünya", description: "Canlı ziyaretçi ve dünya ekranı", view: "intelligence" },
-  { id: "control", title: "AI kontrolü", description: "Çalışma modu ve kullanım sınırları" },
+  { id: "overview", title: "Overview", description: "Your daily agency workspace" },
+  { id: "sales", title: "Sales", description: "Prospect research across Malta and Türkiye" },
+  { id: "studio", title: "Studio", description: "Team roles and task queue" },
+  { id: "projects", title: "Projects", description: "Project delivery and operations", view: "projects" },
+  { id: "clients", title: "Clients", description: "Client records and relationships", view: "clients" },
+  { id: "quotes", title: "Proposals", description: "Proposals, onaylar ve PDF", view: "quotes" },
+  { id: "pricing", title: "Pricing", description: "Independent pricing module for Türkiye and Malta", plugin: "pricing" },
+  { id: "messages", title: "Inbox", description: "Incoming requests and conversations", view: "messages" },
+  { id: "world", title: "World", description: "Live visitor intelligence and globe", view: "intelligence" },
+  { id: "control", title: "AI controls", description: "Execution mode and usage limits" },
 ] as const;
 export type AgencySection = typeof agencySections[number]["id"];
 export function isAgencySection(value: unknown): value is AgencySection {
