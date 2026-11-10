@@ -36,3 +36,20 @@ Valid incoming website messages prepare linked client/project/draft proposal
 records on the server even while Startpage is closed. Final approval stays
 manual. PDFs are generated on demand. Former admin routes redirect to Startpage;
 the protected compatibility runtime remains an implementation module.
+
+## Research and concepts
+
+Sales now starts a typed, on-demand research job: bounded public directory
+search → safe website inspection → opportunity score → private template concept
+and current server-calculated estimate. Studio displays source evidence,
+limitations, preview, revision-specific approval/rejection and durable checkpoints.
+Optional AI copy refinement remains behind verified-free server controls.
+Research never creates/sends a customer order or publishes a website. After
+internal approval, Open in Pricing transfers the scope to the existing calculator.
+There is no unattended scheduler or coding/deployment agent in this version.
+
+All visible agency text now uses Manrope. The shell owns section headings;
+embedded operations keep their toolbars but hide duplicate section titles.
+Browser validation uses the real components and runner with labeled synthetic
+inputs in a local isolated QA harness. The production Next build remains the
+framework/type check; no production credential/session bypass is introduced.
