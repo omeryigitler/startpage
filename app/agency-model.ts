@@ -28,7 +28,9 @@ export type Prospect = {
 };
 export type Concept = { status: "review" | "approved" | "rejected"; revision: string; generatedBy: string; language: string; industryLabel: string; headline: string; subheading: string; cta: string; sections: { title: string; body: string }[]; brief: { goal: string; exclusions: string[] }; proposal: { request: Record<string, unknown>; breakdown: { finalTotal: number }; scope: string[]; disclaimer: string } };
 export type StudioJob = { id: string; title: string; role: string; prospectId: string; status: string; reason?: string; kind?: string; errorCode?: string; phase?: string; retryAt?: number | null; attempts?: number; steps?: { label: string; at: number }[]; output?: string[] };
-export type StudioRecords = { prospects: Prospect[]; jobs: StudioJob[]; stages: string[]; roles: string[]; limit: number; executorAvailable: boolean };
+export type WorkflowSummary = { id: string; companyName: string; state: string; version: number; error?: { code: string; message: string }; updatedAt: number };
+export type StudioRecords = { prospects: Prospect[]; jobs: StudioJob[]; stages: string[]; roles: string[]; limit: number; executorAvailable: boolean; workflows?: WorkflowSummary[] };
 export type AISettings = { enabled: boolean; paused: boolean; mode: "FREE" | "HYBRID"; maxRequestsPerTask: number; maxRequestsPerDay: number; maxConcurrency: number };
 export type RunnerStatus = { available: boolean; paused: boolean; maxCompanies: number; regions: { id: string; label: string; country: string }[]; industries: { id: string; label: string }[]; schedule: string };
-export type StudioStatus = { settings: AISettings; provider: { configured: boolean; verified: boolean }; paidExecutionAvailable: boolean; runner: RunnerStatus };
+export type MailStatus = { smtpConfigured: boolean; permissionedConfigured: boolean; from: string; replyTo: string; dailyLimit: number };
+export type StudioStatus = { settings: AISettings; provider: { configured: boolean; verified: boolean; expiresAt?: string; availableModels?: string[] }; paidExecutionAvailable: boolean; runner: RunnerStatus; mail?: MailStatus };

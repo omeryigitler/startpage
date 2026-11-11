@@ -1,55 +1,65 @@
 # Agency workspace
 
-Open Agency from the existing Startpage carousel or use `/#agency/overview`.
-Sales and Studio manage source-backed Malta/Türkiye prospects and paused jobs.
-Projects, Clients, Proposals, Inbox and World reuse the authenticated
-portfolio admin modules. The original world renderer is retained.
+Open Agency from the Startpage carousel or `/#agency/overview`. The shell remains
+English, uses Manrope and Taurus gold/black, and owns the single section heading.
+World and the independent Pricing module are preserved.
 
-The UI contains no credential inputs or provider keys. All agency data requests
-use the portfolio's secure HttpOnly Gateway cookie with an exact Origin allowlist.
-No additional Google login is needed for Agency. Startpage content management
-retains its existing independent Google authorization.
+Sales and Studio use the portfolio's existing HttpOnly Gateway session and exact
+Origin allowlist. No provider credentials are entered into this UI. Projects,
+Clients, Proposals, Inbox and World reuse the protected operations modules.
+Closing Agency restores the original Startpage and its shortcuts.
 
-Only the selected heavy workspace loads. Closing Agency restores the Startpage;
-idle standby and global folder shortcuts are suspended while Agency is open.
-The navigation messages contain only allowlisted view names and readiness.
-Both origin and source window are checked before accepting messages.
+## Continue workflow
 
-No automated company discovery, demo creation or outbound messaging is connected.
-Jobs clearly show a paused status. AI controls cannot activate paid execution.
+1. **Sales → Find & research** discovers up to three deduplicated companies in a
+   selected market/sector. Verified free AI researches companies sequentially.
+2. **Studio** shows findings, sources, recommended improvements, unknowns and any
+   email observed on safely inspected company pages. Confirm the business,
+   recipient, source and actual contact basis.
+3. **Continue · prepare proposal** selects a business-specific scope, calculates
+   the price through shared Pricing rules and saves a draft quote plus PDF.
+4. Review the exact sender, recipient, reply address, subject, body and immutable
+   attachments. **Continue · send proposal** approves only that payload.
+5. AI prepares company-specific copy, sections, palette, typography and layout.
+   Studio displays a script-free concept and saves a PDF and responsive HTML.
+6. Review the follow-up email and **Continue · send concept**. The workflow links
+   an active project at proposal stage, with client decision pending, progress
+   zero and final approval false.
+7. The owner agrees final scope/content, implements the actual site, connects
+   forms/domain, tests and launches it.
 
-Validation: production build/type validation passed. Backend/security validation
-and the release order are recorded in the portfolio's
-`docs/guides/START-AGENCY.md`. Managed local browser preview is unavailable because
-its CLI passes unsupported Vite flags to this Next.js application; authenticated
-browser and device testing remains a separate verification step.
+Closing Studio stops later preparation requests; already-started work can finish
+and checkpoint. Reopen and Continue to resume. This is not an unattended scheduler,
+public demo deployment system or final website builder. Earlier template concepts
+and run history remain in a collapsed secondary view.
 
-The agency UI is English and uses the shared Taurus gold/black palette and
-Manrope/Syncopate/JetBrains Mono typography. Custom controls replace native
-selects, checkbox chrome and number spinners. Pricing loads directly as a
-separate versioned module at `/tools/pricing/index.html?plugin=agency`; it is no
-longer nested inside the operations iframe. Its server validates settings,
-recalculates prices and saves linked proposals/projects. The selected market
-does not change the interface language.
+## Connections and recovery
 
-Valid incoming website messages prepare linked client/project/draft proposal
-records on the server even while Startpage is closed. Final approval stays
-manual. PDFs are generated on demand. Former admin routes redirect to Startpage;
-the protected compatibility runtime remains an implementation module.
+AI controls shows the current provider/mail connection status. The owner checks
+the existing server key's project in Google AI Studio and explicitly confirms
+free plan and billing disabled. That owner attestation expires after seven days
+and is invalidated by key rotation; it is not an automated Google billing audit.
 
-## Research and concepts
+First-contact mail requires a work SMTP mailbox configured on the server.
+Existing Resend is used for requested/permitted email only. Missing connections
+block the affected step and retain saved work. No mail or model credential is
+returned to the browser.
 
-Sales now starts a typed, on-demand research job: bounded public directory
-search → safe website inspection → opportunity score → private template concept
-and current server-calculated estimate. Studio displays source evidence,
-limitations, preview, revision-specific approval/rejection and durable checkpoints.
-Optional AI copy refinement remains behind verified-free server controls.
-Research never creates/sends a customer order or publishes a website. After
-internal approval, Open in Pricing transfers the scope to the existing calculator.
-There is no unattended scheduler or coding/deployment agent in this version.
+Approval digests, version checks, leases and outbox receipts prevent double-click
+sends. Ambiguous SMTP results stop for the owner to check the exact message in
+Sent. Resend retries use identical attachments and idempotency keys within a
+23-hour window. Provider acceptance is not client acceptance or a delivered site.
+The backend's `docs/agency-continue-workflow.md` explains server setup and storage.
 
-All visible agency text now uses Manrope. The shell owns section headings;
-embedded operations keep their toolbars but hide duplicate section titles.
-Browser validation uses the real components and runner with labeled synthetic
-inputs in a local isolated QA harness. The production Next build remains the
-framework/type check; no production credential/session bypass is introduced.
+Valid incoming website messages retain their independent server-side preparation
+of linked client/project/draft proposal records, even while Startpage is closed.
+Former admin routes still redirect to Startpage.
+
+## Verification
+
+The Next production build checks types and bundling. Before the workspace
+disconnect, browser QA exercised the actual components/services through research
+review, proposal, concept and handoff with explicitly labelled fixture AI/mail.
+It also refreshed a saved review and downloaded a real Chromium-generated PDF.
+No real company emails were sent or production free-project confirmations made.
+Backend deterministic/security tests and live directory checks run in CI.

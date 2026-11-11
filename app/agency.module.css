@@ -212,3 +212,42 @@
 .content::-webkit-scrollbar { width:6px; }
 .content::-webkit-scrollbar-track { background:#080704; }
 .content::-webkit-scrollbar-thumb { background:#665918; border-radius:8px; }
+
+.automationIntro { max-width:740px; color:#b5b4a8; font-size:14px; line-height:1.8; margin:0; }
+.pipelineSteps .currentStep { border-color:#FFD700; color:#f1eedc; }
+.connections { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:24px 0; }
+.connectionCard { border:1px solid #FFD70024; border-radius:12px; padding:22px; background:#FFD70005; min-width:0; }
+.connectionCard > div:first-child { display:flex; align-items:center; gap:10px; font-size:14px; }
+.connectionCard svg { color:#FFD700; flex-shrink:0; }
+.connectionCard p { color:#aaa99b; font-size:12px; line-height:1.8; }
+.connectionCard a { color:#ded5a4; display:inline; }
+.connectionCard summary { cursor:pointer; font-size:12px; color:#cbc4a9; }
+.connectionCard .confirm { display:flex; align-items:flex-start; margin:16px 0; font-size:12px; line-height:1.7; }
+.connectionCard .caption { overflow-wrap:anywhere; }
+.workflowPicker { display:flex; align-items:flex-end; gap:14px; padding:20px 0; border-bottom:1px solid #ffffff14; }
+.workflowPicker > label { display:flex; flex-direction:column; gap:9px; flex:1; min-width:0; color:#b5b4a8; font-size:12px; }
+.workflowPicker > button { flex-shrink:0; }
+.automationCard { background:#10100c; border:1px solid #ffffff1a; border-radius:14px; padding:26px; margin-top:24px; min-width:0; }
+.automationCard .form { padding:0; border:0; margin:18px 0; background:transparent; }
+.automationCard .confirm { display:flex; align-items:center; gap:10px; flex-direction:row; font-size:12px; line-height:1.7; }
+.automationCard .links { flex-wrap:wrap; gap:8px 20px; }
+.automationCard .evidence h3 { font-size:18px; margin:18px 0 12px; }
+.price { display:block; font-size:28px; color:#FFD700; margin:16px 0; }
+.designPreview { display:block; width:100%; height:620px; resize:vertical; border:1px solid #ffffff26; border-radius:10px; background:#fff; margin:20px 0; }
+.searchAttribution { width:100%; height:115px; border:0; margin-top:18px; background:transparent; }
+.emailPreview { padding:24px; background:#090907; border:1px solid #ffffff20; border-radius:12px; margin:24px 0 12px; }
+.emailPreview > div:first-child { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.emailPreview > div:first-child svg { color:#FFD700; }
+.emailPreview > div:first-child span { margin-left:auto; color:#b8ad72; font-size:11px; }
+.emailPreview dl { display:grid; grid-template-columns:70px minmax(0,1fr); gap:8px 15px; font-size:12px; line-height:1.7; border-bottom:1px solid #ffffff12; padding:20px 0; }
+.emailPreview dt { color:#929284; }
+.emailPreview dd { margin:0; color:#dbdacb; overflow-wrap:anywhere; }
+.emailPreview pre { font-family:inherit; white-space:pre-wrap; overflow-wrap:anywhere; color:#c6c4b6; font-size:13px; line-height:1.9; margin:24px 0; }
+.emailPreview .actions { margin-top:18px; }
+.emailPreview .notice { margin:20px 0; }
+.handoff { display:flex; gap:18px; background:#FFD70009; border:1px solid #FFD70020; border-radius:10px; padding:24px; }
+.handoff > svg { flex-shrink:0; color:#FFD700; }
+.handoff h3 { margin:0 0 12px; font-size:20px; }
+.handoff p { font-size:13px; line-height:1.8; color:#bab7a5; }
+.content .defer { margin:20px 0 10px; background:transparent; border-color:transparent; color:#a09d89; display:flex; font-size:12px; padding-left:0; }
+@media(max-width:800px) { .connections{grid-template-columns:1fr}.workflowPicker{flex-direction:column;align-items:stretch}.automationCard{padding:18px}.emailPreview{padding:16px}.emailPreview dl{grid-template-columns:55px minmax(0,1fr);gap:8px}.designPreview{height:520px}.handoff{padding:18px;flex-direction:column}.emailPreview > div:first-child span{margin-left:0} }

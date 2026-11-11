@@ -8,6 +8,7 @@ import styles from "./agency.module.css";
 import { Select, NumberControl } from "./AgencyControls";
 import PricingPlugin from "./PricingPlugin";
 import AgencyPipeline from "./AgencyPipeline";
+import AgencyAutomation, { AutomationConnections } from "./AgencyAutomation";
 import { agencyApi as api, AgencyError } from "./agency-api";
 
 const icons = { overview: LayoutDashboard, sales: BriefcaseBusiness, studio: Bot, projects: FolderKanban, clients: Users, quotes: FileText, pricing: Wallet, messages: Inbox, world: Globe2, control: Settings2 };
@@ -119,10 +120,10 @@ function AgencyPanel({ section, navigate, onPricing }: { section: AgencySection;
     {notice && <p className={styles.saved} role="status"><Check size={15} />{notice}</p>}
     {section === "overview" && <>
       <div className={styles.intro}><span>ÖMER YİĞİTLER / DIGITAL STUDIO</span><h2>From discovery to delivery.<br /><em>One workspace.</em></h2><p>Research prospects, manage projects and plan the next step.</p><div className={styles.actions}><button className={styles.primary} onClick={() => navigate("sales")}>Open prospects <ArrowRight size={16} /></button><button onClick={() => navigate("world")}><Globe2 size={17} />World view</button></div></div>
-      <div className={styles.metrics}>{[["Prospects", records?.prospects.length, "sales"], ["Concepts for review", records?.prospects.filter(company => company.draft?.status === "review").length, "studio"], ["Proposal stage", records?.prospects.filter(company => company.stage === "Proposal").length, "sales"]].map(([label, count, target]) => <button key={label} className={styles.metric} onClick={() => navigate(target as AgencySection)}><span>{label}</span><strong>{count ?? "—"}</strong><ArrowRight size={17} /></button>)}</div>
+      <div className={styles.metrics}>{[["Prospects", records?.prospects.length, "sales"], ["Waiting for Continue", records?.workflows?.filter(flow => flow.state.endsWith("_review")).length || 0, "studio"], ["Ready for your build", records?.workflows?.filter(flow => flow.state === "handoff").length || 0, "studio"]].map(([label, count, target]) => <button key={label} className={styles.metric} onClick={() => navigate(target as AgencySection)}><span>{label}</span><strong>{count ?? "—"}</strong><ArrowRight size={17} /></button>)}</div>
       <p className={styles.caption}>Based on the latest {records?.limit || 50} records. These are not all-time totals.</p>
       <div className={styles.workflow}><div><span>01 / DISCOVER</span><h3>Find the right prospect</h3><p>Choose a region and industry. Discover companies from a public directory with source links.</p></div><div><span>02 / CREATE</span><h3>Move work to the studio</h3><p>Inspect listed websites and prepare private concepts for promising companies.</p></div><div><span>03 / DELIVER</span><h3>From proposal to project</h3><p>Manage proposals, clients and project delivery in this workspace.</p></div></div>
-      <div className={styles.callout}><ShieldCheck size={19} /><div><strong>Research → concept → your review</strong><p>Start a bounded research run in Sales. Inspect its findings and private concepts in Studio. Nothing is sent or published automatically.</p></div></div>
+      <div className={styles.callout}><ShieldCheck size={19} /><div><strong>Research → proposal → concept → your build</strong><p>AI prepares each step in Studio. Continue approves the reviewed recipient, email and attachments. Final website development stays with you.</p></div></div>
     </>}
     {section === "sales" && records && <>
       <AgencyPipeline mode="sales" records={records} refresh={reload} onPricing={onPricing} navigate={navigate} />
@@ -133,9 +134,10 @@ function AgencyPanel({ section, navigate, onPricing }: { section: AgencySection;
       {!records.prospects.length && <div className={styles.empty}><BriefcaseBusiness size={32} /><h3>Your research list is empty</h3><p>Run discovery above, or add a company with a source.</p></div>}
       {records.prospects.length > 0 && !records.prospects.some(company => (market === "all" || company.country === market) && `${company.name} ${company.location} ${company.industry}`.toLocaleLowerCase("tr-TR").includes(query.toLocaleLowerCase("tr-TR"))) && <p className={styles.empty}>No prospects match these filters.</p>}
     </>}
-    {section === "studio" && records && <AgencyPipeline mode="studio" records={records} refresh={reload} onPricing={onPricing} navigate={navigate} />}
+    {section === "studio" && records && <><AgencyAutomation records={records} refresh={reload} navigate={navigate} /><details className={styles.runHistory}><summary>Previous concepts & run history</summary><AgencyPipeline mode="studio" records={records} refresh={reload} onPricing={onPricing} navigate={navigate} /></details></>}
     {section === "control" && status && draft && <>
-      <div className={styles.callout}><ShieldCheck size={20} /><div><strong>Paid model execution is disabled</strong><p>Research uses public business data. Concepts use local templates; optional AI copy requires verified free-tier access.</p></div></div>
+      <AutomationConnections status={status} reload={reload}/>
+      <div className={styles.callout}><ShieldCheck size={20} /><div><strong>Continue controls each email</strong><p>AI prepares research, proposals and tailored concepts. Review the exact recipient, message and attachments before sending. Paid model execution is disabled.</p></div></div>
       <form className={styles.form} onSubmit={event => { event.preventDefault(); void mutate("settings", { settings: draft }); }}>
         <label className={styles.toggle}><span>Research & AI runner<small>Standard management tools run independently.</small></span><input type="checkbox" checked={draft.enabled} onChange={e => setDraft({ ...draft, enabled: e.target.checked })} /></label>
         <label className={styles.toggle}><span>Pause runner<small>Stops new research and model requests; in-flight work stops at its next checkpoint.</small></span><input type="checkbox" checked={draft.paused} onChange={e => setDraft({ ...draft, paused: e.target.checked })} /></label>
@@ -145,7 +147,6 @@ function AgencyPanel({ section, navigate, onPricing }: { section: AgencySection;
         <label>Concurrent requests<NumberControl label="concurrent requests" min={1} max={3} value={draft.maxConcurrency} onChange={value => setDraft({ ...draft, maxConcurrency: value })} /></label>
         <div className={`${styles.full} ${styles.actions}`}><button className={styles.primary} type="submit" disabled={busy}>Save <Check size={16} /></button><button className={styles.stop} disabled={busy} type="button" onClick={() => void mutate("settings", { settings: { ...status.settings, enabled: false, paused: true } })}>Emergency stop <CirclePause size={16} /></button></div>
       </form>
-      <div className={styles.provider}><span>Gemini</span><strong>{status.provider.configured ? "Configured on server" : "Not configured"}</strong><p>{status.provider.verified ? "Free-tier verification is current." : "Free-tier access is not verified. Model requests are blocked."}</p></div>
       <p className={styles.caption}>HYBRID does not authorize spending. In-flight requests may finish. Hosting and storage costs are separate.</p>
     </>}
   </div>;
