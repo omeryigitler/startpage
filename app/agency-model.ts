@@ -27,7 +27,7 @@ export type Prospect = {
   draft?: Concept;
 };
 export type Concept = { status: "review" | "approved" | "rejected"; revision: string; generatedBy: string; language: string; industryLabel: string; headline: string; subheading: string; cta: string; sections: { title: string; body: string }[]; brief: { goal: string; exclusions: string[] }; proposal: { request: Record<string, unknown>; breakdown: { finalTotal: number }; scope: string[]; disclaimer: string } };
-export type StudioJob = { id: string; title: string; role: string; prospectId: string; status: string; reason?: string; kind?: string; errorCode?: string; attempts?: number; steps?: { label: string; at: number }[]; output?: string[] };
+export type StudioJob = { id: string; title: string; role: string; prospectId: string; status: string; reason?: string; kind?: string; errorCode?: string; phase?: string; retryAt?: number | null; attempts?: number; steps?: { label: string; at: number }[]; output?: string[] };
 export type StudioRecords = { prospects: Prospect[]; jobs: StudioJob[]; stages: string[]; roles: string[]; limit: number; executorAvailable: boolean };
 export type AISettings = { enabled: boolean; paused: boolean; mode: "FREE" | "HYBRID"; maxRequestsPerTask: number; maxRequestsPerDay: number; maxConcurrency: number };
 export type RunnerStatus = { available: boolean; paused: boolean; maxCompanies: number; regions: { id: string; label: string; country: string }[]; industries: { id: string; label: string }[]; schedule: string };

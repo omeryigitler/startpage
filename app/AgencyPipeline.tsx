@@ -8,6 +8,8 @@ import styles from "./agency.module.css";
 
 type Props = { mode: "sales" | "studio"; records: StudioRecords; refresh: () => Promise<void>; onPricing: (context: Record<string, unknown>) => void; navigate: (section: AgencySection) => void };
 const labels: Record<string, string> = { queued: "Queued", running: "Running", review: "Ready for review", approved: "Approved", completed: "Completed", cancelled: "Cancelled", paused: "Paused", failed: "Failed" };
+const failureLabels: Record<string, string> = { directory_timeout: "Directory timed out", directory_network: "Directory connection unavailable", directory_unavailable: "Directory temporarily busy", directory_rate_limit: "Directory request limit", directory_cooldown: "Waiting between searches", directory_limit: "Daily search limit reached", directory_configuration: "Directory connection needs review", directory_invalid: "Directory response unreadable", directory_incomplete: "Directory search incomplete", directory_response_limit: "Directory response too large" };
+const phaseLabels: Record<string, string> = { directory: "Finding source-backed companies", research: "Inspecting company websites", pricing: "Loading current pricing", concept: "Preparing a private concept", copy: "Refining concept copy", storage: "Saving progress" };
 function ConceptCard({ company, busy, decide, refine, onPricing, modelReady }: { company: Prospect; busy: boolean; decide: (decision: string) => void; refine: () => void; onPricing: Props["onPricing"]; modelReady: boolean }) {
   const draft = company.draft!;
   return <article className={styles.artifact}>
@@ -40,7 +42,25 @@ export default function AgencyPipeline({ mode, records, refresh, onPricing, navi
   const [error, setError] = useState<AgencyError | null>(null);
   const [notice, setNotice] = useState("");
   const [selected, setSelected] = useState(records.prospects[0]?.id || "");
+  const [clock, setClock] = useState(0);
   const request = useRef<{ signature: string; id: string } | null>(null);
+  const waitingForRetry = records.jobs.some(job => (job.retryAt || 0) > clock);
+  useEffect(() => {
+    setClock(Date.now());
+    if (!waitingForRetry) return;
+    const timer = setInterval(() => setClock(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [waitingForRetry]);
+  useEffect(() => {
+    if (!busy) return;
+    let refreshing = false;
+    const timer = setInterval(async () => {
+      if (refreshing) return;
+      refreshing = true;
+      try { await refresh(); } catch {} finally { refreshing = false; }
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [busy, refresh]);
   useEffect(() => {
     const controller = new AbortController();
     api<StudioStatus>("status", undefined, controller.signal).then(value => { setStatus(value.runner); setModelReady(value.provider.configured && value.provider.verified && value.settings.enabled && !value.settings.paused); }).catch(cause => { if (!controller.signal.aborted) setError(cause); });
@@ -66,7 +86,7 @@ export default function AgencyPipeline({ mode, records, refresh, onPricing, navi
   }
   const concepts = records.prospects.filter(company => company.draft);
   return <div className={styles.pipeline}>
-    <div className={styles.pipelineIntro}><div><span>AGENCY WORKFLOW</span><h2>{mode === "sales" ? "Find companies. Prepare the next step." : "Review what the runner produced."}</h2><p>{mode === "sales" ? "Select a region and industry. Research checks sources and prepares a private concept when the opportunity score reaches 70." : "Research findings, website concepts and estimates stay here until you review them."}</p></div><span className={styles.runnerBadge}>{status ? status.paused ? "Runner paused" : "Runner ready" : "Checking runner…"}</span></div>
+    <div className={styles.pipelineIntro}><p>{mode === "sales" ? "Select a region and industry. Research checks sources and prepares a private concept when the opportunity score reaches 70." : "Research findings, website concepts and estimates stay here until you review them."}</p><span className={styles.runnerBadge}>{status ? status.paused ? "Runner paused" : "On-demand runner" : "Checking runner…"}</span></div>
     <ol className={styles.pipelineSteps}>{["Discover", "Inspect & score", "Concept & estimate", "Your review"].map((step, index) => <li key={step}><span>{index + 1}</span>{step}</li>)}</ol>
     {error && <div className={styles.notice} role="alert"><p>{error.message}</p>{error.login && <a href={`${AGENCY_ORIGIN}/start-gateway.html?return=${encodeURIComponent(`https://start.omeryigitler.com/#agency/${mode}`)}`}>Renew Gateway session</a>}</div>}
     {notice && <p className={styles.saved} role="status"><Check size={15} />{notice}{mode === "sales" && <button onClick={() => navigate("studio")}>Open Studio <ArrowRight size={14} /></button>}</p>}
@@ -88,6 +108,12 @@ export default function AgencyPipeline({ mode, records, refresh, onPricing, navi
       {!concepts.length && <div className={styles.empty}><Bot size={30} /><h3>No concepts yet</h3><p>Run discovery in Sales, or prepare an existing company above.</p><button onClick={() => navigate("sales")}>Find companies <ArrowRight size={15} /></button></div>}
       {records.prospects.filter(company => company.research && !company.draft).map(company => <article className={styles.job} key={company.id}><div><span className={styles.badge}>{company.research?.status === "unavailable" ? "Inspection unavailable" : "Research only"}</span><h3>{company.name} · {company.research?.score}/100</h3>{company.research?.signals.map((signal, index) => <p key={index}>{signal}</p>)}<p>No automatic concept was prepared. Review the source or choose this company above.</p><a href={company.source} target="_blank" rel="noopener noreferrer">View source</a></div></article>)}
     </>}
-    <details className={styles.runHistory} open={mode === "studio"}><summary>Run history <span>{records.jobs.length}</span></summary><div className={styles.jobs}>{records.jobs.map(job => <article className={styles.job} key={job.id}><div><span className={styles.badge}>{labels[job.status] || job.status}</span><h3>{job.title}</h3><p>{job.kind ? `${job.role} · ${job.attempts || 0}/3 attempts` : "Legacy planning task · no executor assigned"}</p>{job.errorCode && <p role="status">{job.errorCode.replaceAll("_", " ")} · {job.reason}</p>}{job.steps?.length ? <ol className={styles.runLog}>{job.steps.map((step, index) => <li key={index}>{step.label}</li>)}</ol> : null}</div><div className={styles.jobActions}>{job.kind && ["queued", "paused", "failed", "running"].includes(job.status) && <button disabled={busy || (job.attempts || 0) >= 3 || status?.paused} onClick={() => void action(() => api("run", { id: job.id }), "Task finished. Review the results.")}><Play size={14} />{job.status === "running" ? "Recover interrupted run" : job.status === "queued" ? "Run" : "Retry"}</button>}{["queued", "paused", "failed", "running"].includes(job.status) && <button disabled={busy} onClick={() => void action(() => api("transition", { kind: "job", id: job.id, status: "cancelled" }), "Task cancelled.")}><X size={14} />Cancel</button>}</div></article>)}</div>{!records.jobs.length && <p className={styles.caption}>Every run and review decision is recorded here.</p>}</details>
+    <details className={styles.runHistory} open={mode === "studio"}><summary>Run history <span>{records.jobs.length}</span></summary><div className={styles.jobs}>{records.jobs.map(job => {
+      const retryBlocked = Boolean(job.retryAt && job.retryAt > clock);
+      return <article className={styles.job} key={job.id}><div><span className={styles.badge}>{labels[job.status] || job.status}</span><h3>{job.title}</h3><p>{job.kind ? `${job.role} · ${job.attempts || 0}/3 attempts` : "Legacy planning task · no executor assigned"}</p>
+        {job.status === "running" && job.phase && <p role="status">{phaseLabels[job.phase] || "Processing the task"}…</p>}
+        {job.errorCode && <div role="status"><strong>{failureLabels[job.errorCode] || "Task needs attention"}</strong><p>{job.errorCode === "runner_failed" && !job.phase ? "This earlier task did not save a detailed error. Retry it to use the updated discovery connection." : job.reason || "Saved progress is retained. Retry this task or report its reference if it fails again."}</p>{retryBlocked && <p>Retry available {new Intl.DateTimeFormat("en-MT", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(job.retryAt!)}</p>}<details><summary>Task reference</summary><p>{job.id}{job.phase ? ` · ${job.phase}` : ""}</p></details></div>}
+        {job.steps?.length ? <ol className={styles.runLog}>{job.steps.map((step, index) => <li key={index}>{step.label}</li>)}</ol> : null}</div><div className={styles.jobActions}>{job.kind && ["queued", "paused", "failed", "running"].includes(job.status) && <button disabled={busy || retryBlocked || (job.attempts || 0) >= 3 || status?.paused} onClick={() => void action(() => api("run", { id: job.id }), "Task finished. Review the results.")}><Play size={14} />{retryBlocked ? "Waiting to retry" : job.status === "running" ? "Recover interrupted run" : job.status === "queued" ? "Run" : "Retry"}</button>}{["queued", "paused", "failed", "running"].includes(job.status) && <button disabled={busy} onClick={() => void action(() => api("transition", { kind: "job", id: job.id, status: "cancelled" }), "Task cancelled.")}><X size={14} />Cancel</button>}</div></article>;
+    })}</div>{!records.jobs.length && <p className={styles.caption}>Every run and review decision is recorded here.</p>}</details>
   </div>;
 }
