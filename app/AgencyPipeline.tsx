@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { ArrowRight, Bot, Check, ChevronDown, ExternalLink, FileText, Play, RefreshCw, Search, ShieldCheck, X } from "lucide-react";
+import { ArrowRight, Bot, Check, ChevronDown, ExternalLink, FileText, Play, RefreshCw, RotateCcw, Search, ShieldCheck, Trash2, X } from "lucide-react";
 import { agencyApi as api, AgencyError } from "./agency-api";
 import { Select, NumberControl } from "./AgencyControls";
 import { AGENCY_ORIGIN, type AgencySection, type Prospect, type RunnerStatus, type StudioRecords, type StudioStatus } from "./agency-model";
@@ -41,6 +41,7 @@ export default function AgencyPipeline({ mode, records, refresh, onPricing, navi
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<AgencyError | null>(null);
   const [notice, setNotice] = useState("");
+  const [removedJob, setRemovedJob] = useState<{ id: string; title: string } | null>(null);
   const [selected, setSelected] = useState(records.prospects[0]?.id || "");
   const [clock, setClock] = useState(0);
   const request = useRef<{ signature: string; id: string } | null>(null);
@@ -80,6 +81,20 @@ export default function AgencyPipeline({ mode, records, refresh, onPricing, navi
     await api("run", { id: job.id });
     request.current = null;
   }
+  async function removeJob(id: string, title: string) {
+    await action(async () => {
+      await api("history", { id, operation: "remove" });
+      setRemovedJob({ id, title });
+    }, "");
+  }
+  async function restoreJob() {
+    if (!removedJob) return;
+    const id = removedJob.id;
+    await action(async () => {
+      await api("history", { id, operation: "restore" });
+      setRemovedJob(null);
+    }, "Run restored to history.");
+  }
   function submit(event: FormEvent) {
     event.preventDefault();
     void action(() => start({ kind: "discovery", country, region, industry, limit }), "Research finished. Review the findings and concepts in Studio.");
@@ -90,6 +105,7 @@ export default function AgencyPipeline({ mode, records, refresh, onPricing, navi
     <ol className={styles.pipelineSteps}>{["Discover", "Inspect & score", "Concept & estimate", "Your review"].map((step, index) => <li key={step}><span>{index + 1}</span>{step}</li>)}</ol>
     {error && <div className={styles.notice} role="alert"><p>{error.message}</p>{error.login && <a href={`${AGENCY_ORIGIN}/start-gateway.html?return=${encodeURIComponent(`https://start.omeryigitler.com/#agency/${mode}`)}`}>Renew Gateway session</a>}</div>}
     {notice && <p className={styles.saved} role="status"><Check size={15} />{notice}{mode === "sales" && <button onClick={() => navigate("studio")}>Open Studio <ArrowRight size={14} /></button>}</p>}
+    {removedJob && <p className={styles.saved} role="status"><Check size={15} />Run removed from history.<button disabled={busy} onClick={() => void restoreJob()} aria-label={`Restore ${removedJob.title}`}><RotateCcw size={14} />Undo</button></p>}
     {busy && <p className={styles.callout} role="status"><RefreshCw size={17} />Running on the server. Research may take up to 50 seconds; results and progress are saved.</p>}
     {mode === "sales" && <>
       <form className={styles.form} onSubmit={submit} aria-label="Company discovery">
@@ -113,7 +129,7 @@ export default function AgencyPipeline({ mode, records, refresh, onPricing, navi
       return <article className={styles.job} key={job.id}><div><span className={styles.badge}>{labels[job.status] || job.status}</span><h3>{job.title}</h3><p>{job.kind ? `${job.role} · ${job.attempts || 0}/3 attempts` : "Legacy planning task · no executor assigned"}</p>
         {job.status === "running" && job.phase && <p role="status">{phaseLabels[job.phase] || "Processing the task"}…</p>}
         {job.errorCode && <div role="status"><strong>{failureLabels[job.errorCode] || "Task needs attention"}</strong><p>{job.errorCode === "runner_failed" && !job.phase ? "This earlier task did not save a detailed error. Retry it to use the updated discovery connection." : job.reason || "Saved progress is retained. Retry this task or report its reference if it fails again."}</p>{retryBlocked && <p>Retry available {new Intl.DateTimeFormat("en-MT", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(job.retryAt!)}</p>}<details><summary>Task reference</summary><p>{job.id}{job.phase ? ` · ${job.phase}` : ""}</p></details></div>}
-        {job.steps?.length ? <ol className={styles.runLog}>{job.steps.map((step, index) => <li key={index}>{step.label}</li>)}</ol> : null}</div><div className={styles.jobActions}>{job.kind && ["queued", "paused", "failed", "running"].includes(job.status) && <button disabled={busy || retryBlocked || (job.attempts || 0) >= 3 || status?.paused} onClick={() => void action(() => api("run", { id: job.id }), "Task finished. Review the results.")}><Play size={14} />{retryBlocked ? "Waiting to retry" : job.status === "running" ? "Recover interrupted run" : job.status === "queued" ? "Run" : "Retry"}</button>}{["queued", "paused", "failed", "running"].includes(job.status) && <button disabled={busy} onClick={() => void action(() => api("transition", { kind: "job", id: job.id, status: "cancelled" }), "Task cancelled.")}><X size={14} />Cancel</button>}</div></article>;
+        {job.steps?.length ? <ol className={styles.runLog}>{job.steps.map((step, index) => <li key={index}>{step.label}</li>)}</ol> : null}</div><div className={styles.jobActions}>{job.kind && ["queued", "paused", "failed", "running"].includes(job.status) && <button disabled={busy || retryBlocked || (job.attempts || 0) >= 3 || status?.paused} onClick={() => void action(() => api("run", { id: job.id }), "Task finished. Review the results.")}><Play size={14} />{retryBlocked ? "Waiting to retry" : job.status === "running" ? "Recover interrupted run" : job.status === "queued" ? "Run" : "Retry"}</button>}{["queued", "paused", "failed", "running"].includes(job.status) && <button disabled={busy} onClick={() => void action(() => api("transition", { kind: "job", id: job.id, status: "cancelled" }), "Task cancelled.")}><X size={14} />Cancel</button>}{["failed", "cancelled", "completed", "approved"].includes(job.status) && <button disabled={busy} aria-label={`Remove ${job.title} from history`} title="Remove this run from history. Companies and concepts are kept." onClick={() => void removeJob(job.id, job.title)}><Trash2 size={14} />Remove</button>}</div></article>;
     })}</div>{!records.jobs.length && <p className={styles.caption}>Every run and review decision is recorded here.</p>}</details>
   </div>;
 }
