@@ -13,3 +13,14 @@ task. Old generic failures get a readable explanation without inventing a cause.
 Sales and Studio retain one section heading. The production build passes.
 
 ![Isolated real-source concept preview](qa/agency-discovery-live.png)
+
+## Run history removal
+
+Remove and Undo were checked against the real history service with an isolated
+sample record. Removal changed the count from one to zero; Undo restored the
+same record with its attempt history. A second removal stayed removed after a
+page refresh. Company and concept preservation and active-run rejection are
+covered by backend tests. The original user-requested entry is cleaned once by
+the production backend, separately from this browser fixture.
+
+![Isolated history-removal check after refresh](qa/agency-history-removal.png)
