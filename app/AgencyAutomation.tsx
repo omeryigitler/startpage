@@ -123,6 +123,7 @@ export default function AgencyAutomation({ records, refresh, navigate }: { recor
       </section>}
       {flow.state === "handoff" && <div className={styles.handoff}><Check size={24}/><div><h3>Preparation complete. Your build starts here.</h3><p>The email provider accepted the proposal and concept messages. Client acceptance and the final website are still pending.</p><p>Confirm the client’s scope and content, build the final website, connect forms and domain, test, then launch.</p><div className={styles.actions}><button onClick={() => navigate("projects")}>Open project <ArrowRight size={14}/></button>{flow.conceptFiles?.map(f => <button key={f.id} onClick={() => void download(f)}><Download size={14}/>{f.name}</button>)}</div></div></div>}
       {pending.includes(flow.state) && !busy && <button className={styles.primary} disabled={!canPrepare} onClick={() => void perform("advance")}>Continue · {flow.error ? "retry saved step" : "prepare next step"} <ArrowRight size={15}/></button>}
+      {flow.state === "skipped" && <button className={styles.primary} disabled={busy} onClick={() => void perform("resume")}>Continue · resume company <ArrowRight size={15}/></button>}
       {!["handoff","skipped"].includes(flow.state) && <button className={styles.defer} disabled={busy} onClick={() => void perform("skip")}>Set this company aside</button>}
       <p className={styles.caption}>Closing this view pauses the remaining preparation. Reopen the company and Continue to resume from the saved step.</p>
     </article>}
