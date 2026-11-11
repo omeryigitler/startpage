@@ -5,6 +5,7 @@ import { agencyApi as api, AgencyError } from "./agency-api";
 import { Select, NumberControl } from "./AgencyControls";
 import { AGENCY_ORIGIN, type AgencySection, type Prospect, type RunnerStatus, type StudioRecords, type StudioStatus } from "./agency-model";
 import styles from "./agency.module.css";
+import { runPreparedSteps, type AutomationDetail } from "./AgencyAutomation";
 
 type Props = { mode: "sales" | "studio"; records: StudioRecords; refresh: () => Promise<void>; onPricing: (context: Record<string, unknown>) => void; navigate: (section: AgencySection) => void };
 const labels: Record<string, string> = { queued: "Queued", running: "Running", review: "Ready for review", approved: "Approved", completed: "Completed", cancelled: "Cancelled", paused: "Paused", failed: "Failed" };
@@ -42,7 +43,8 @@ export default function AgencyPipeline({ mode, records, refresh, onPricing, navi
   const [error, setError] = useState<AgencyError | null>(null);
   const [notice, setNotice] = useState("");
   const [removedJob, setRemovedJob] = useState<{ id: string; title: string } | null>(null);
-  const [selected, setSelected] = useState(records.prospects[0]?.id || "");
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const [clock, setClock] = useState(0);
   const request = useRef<{ signature: string; id: string } | null>(null);
   const waitingForRetry = records.jobs.some(job => (job.retryAt || 0) > clock);
@@ -78,7 +80,15 @@ export default function AgencyPipeline({ mode, records, refresh, onPricing, navi
     if (request.current?.signature !== signature) request.current = { signature, id: crypto.randomUUID() };
     const job = await api<{ id: string }>("enqueue", { ...body, requestId: request.current.id });
     await refresh();
-    await api("run", { id: job.id });
+    const result = await api<{ output?: string[] }>("run", { id: job.id });
+    if (body.automation && modelReady) {
+      for (const id of result.output || []) {
+        if (!mounted.current) break;
+        const flow = await api<AutomationDetail>("workflow", undefined, undefined, { id });
+        await runPreparedSteps(flow, () => {}, () => !mounted.current);
+        await refresh();
+      }
+    }
     request.current = null;
   }
   async function removeJob(id: string, title: string) {
@@ -97,12 +107,12 @@ export default function AgencyPipeline({ mode, records, refresh, onPricing, navi
   }
   function submit(event: FormEvent) {
     event.preventDefault();
-    void action(() => start({ kind: "discovery", country, region, industry, limit }), "Research finished. Review the findings and concepts in Studio.");
+    void action(() => start({ kind: "discovery", country, region, industry, limit, automation: true }), modelReady ? "AI research saved. Continue each company in Studio." : "Companies found. Confirm the free AI connection in Studio, then Continue research.");
   }
   const concepts = records.prospects.filter(company => company.draft);
   return <div className={styles.pipeline}>
-    <div className={styles.pipelineIntro}><p>{mode === "sales" ? "Select a region and industry. Research checks sources and prepares a private concept when the opportunity score reaches 70." : "Research findings, website concepts and estimates stay here until you review them."}</p><span className={styles.runnerBadge}>{status ? status.paused ? "Runner paused" : "On-demand runner" : "Checking runner…"}</span></div>
-    <ol className={styles.pipelineSteps}>{["Discover", "Inspect & score", "Concept & estimate", "Your review"].map((step, index) => <li key={step}><span>{index + 1}</span>{step}</li>)}</ol>
+    <div className={styles.pipelineIntro}><p>{mode === "sales" ? "Choose a market and sector. Find companies, let AI research their business, then Continue the proposal and design workflow in Studio." : "Earlier template concepts are kept below. Use the company workflow above for AI research, proposals and tailored designs."}</p><span className={styles.runnerBadge}>{status ? status.paused ? "Runner paused" : "Continue workflow" : "Checking runner…"}</span></div>
+    {mode === "sales" && <ol className={styles.pipelineSteps}>{["Find companies", "AI research", "Your review", "Continue in Studio"].map((step, index) => <li key={step}><span>{index + 1}</span>{step}</li>)}</ol>}
     {error && <div className={styles.notice} role="alert"><p>{error.message}</p>{error.login && <a href={`${AGENCY_ORIGIN}/start-gateway.html?return=${encodeURIComponent(`https://start.omeryigitler.com/#agency/${mode}`)}`}>Renew Gateway session</a>}</div>}
     {notice && <p className={styles.saved} role="status"><Check size={15} />{notice}{mode === "sales" && <button onClick={() => navigate("studio")}>Open Studio <ArrowRight size={14} /></button>}</p>}
     {removedJob && <p className={styles.saved} role="status"><Check size={15} />Run removed from history.<button disabled={busy} onClick={() => void restoreJob()} aria-label={`Restore ${removedJob.title}`}><RotateCcw size={14} />Undo</button></p>}
@@ -113,13 +123,12 @@ export default function AgencyPipeline({ mode, records, refresh, onPricing, navi
         <label>Research area<Select value={region} onChange={event => setRegion(event.target.value)} disabled={busy || !status}>{status?.regions.filter(value => value.country === country).map(value => <option key={value.id} value={value.id}>{value.label}</option>)}</Select></label>
         <label>Industry<Select value={industry} onChange={event => setIndustry(event.target.value)} disabled={busy || !status}>{status?.industries.map(value => <option key={value.id} value={value.id}>{value.label}</option>)}</Select></label>
         <label>Companies per run<NumberControl label="companies per run" value={limit} min={1} max={3} onChange={setLimit} /></label>
-        <div className={`${styles.full} ${styles.runFooter}`}><button className={styles.primary} type="submit" disabled={busy || !status || status.paused}><Search size={16} />Find & prepare</button><p>No paid search or model calls. Existing companies are deduplicated.</p></div>
+        <div className={`${styles.full} ${styles.runFooter}`}><button className={styles.primary} type="submit" disabled={busy || !status || status.paused}><Search size={16} />Find & research</button><p>Up to 3 companies. Verified free AI only. Emails wait for your review.</p></div>
       </form>
       <p className={styles.caption}>Small directory sample, not a complete market search. No website listed does not mean no website exists. Five new searches per day; results are cached for 24 hours. <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors · ODbL</a></p>
     </>}
     {mode === "studio" && <>
       <div className={styles.callout}><ShieldCheck size={20} /><div><strong>Private until you decide</strong><p>Concepts use a local template. Optional AI refines copy only when free-tier access is verified. No outreach, public demo, repository change or deployment is automatic.</p></div></div>
-      {records.prospects.length > 0 && <form className={styles.existingDraft} onSubmit={event => { event.preventDefault(); void action(() => start({ kind: "draft", prospectId: selected || records.prospects[0].id }), "Research and concept are ready for review."); }}><label>Prepare an existing company<Select value={selected || records.prospects[0].id} onChange={event => setSelected(event.target.value)} disabled={busy}>{records.prospects.map(company => <option key={company.id} value={company.id}>{company.name}</option>)}</Select></label><button type="submit" disabled={busy || !status || status.paused}><Play size={15} />Research & draft</button></form>}
       {concepts.map(company => <ConceptCard key={company.id} company={company} busy={busy} modelReady={modelReady} onPricing={onPricing} decide={decision => void action(() => api("draft-decision", { prospectId: company.id, revision: company.draft!.revision, decision }), "Review decision saved.")} refine={() => void action(() => start({ kind: "copy", prospectId: company.id }), "AI copy revision is ready for review.")} />)}
       {!concepts.length && <div className={styles.empty}><Bot size={30} /><h3>No concepts yet</h3><p>Run discovery in Sales, or prepare an existing company above.</p><button onClick={() => navigate("sales")}>Find companies <ArrowRight size={15} /></button></div>}
       {records.prospects.filter(company => company.research && !company.draft).map(company => <article className={styles.job} key={company.id}><div><span className={styles.badge}>{company.research?.status === "unavailable" ? "Inspection unavailable" : "Research only"}</span><h3>{company.name} · {company.research?.score}/100</h3>{company.research?.signals.map((signal, index) => <p key={index}>{signal}</p>)}<p>No automatic concept was prepared. Review the source or choose this company above.</p><a href={company.source} target="_blank" rel="noopener noreferrer">View source</a></div></article>)}
